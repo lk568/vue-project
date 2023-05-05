@@ -1,10 +1,41 @@
 <template>
    <div>
-      <!-- 使用三级联动全局组件 不需要引入 -->
+      <!-- 使用三级联动全局组件 三级联动组件已经注册为全局组件不需要引入 -->
       <type-nav></type-nav>
+      <!-- 使用ListContainer组件 -->
+      <ListContainer></ListContainer>
+      <!-- 使用TodayRecommend组件 -->
+      <TodayRecommend></TodayRecommend>
+      <!-- 使用Rank组件 -->
+      <Rank></Rank>
+      <!-- 使用Like组件 -->
+      <Like></Like>
+      <!-- 使用FLoor组件 -->
+      <Floor></Floor>
+      <Floor></Floor>
+      <!-- 使用Brand组件 -->
+      <Brand></Brand>
    </div>
 </template>
 <script>
+// 引入其他组件
+import ListContainer from "@/views/Home/ListContainer"
+import TodayRecommend from "@/views/Home/TodayRecommend"
+import Rank from "@/views/Home/Rank"
+import Like from "@/views/Home/Like"
+import Floor from "@/views/Home/Floor"
+import Brand from "@/views/Home/Brand"
+export default {
+   name:"",
+   components:{
+      ListContainer,
+      TodayRecommend,
+      Rank,
+      Like,
+      Floor,
+      Brand
+   }
+}
 </script>
 <style scoped lang="less">
 </style>
