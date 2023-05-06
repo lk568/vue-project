@@ -110,8 +110,39 @@
     </div>
 </template>
 <script>
+// 引入swiper包
+import Swiper from 'swiper';
 export default {
-    
+    mounted() {
+        var mySwiper = new Swiper('#mySwiper', {
+            loop: true, // 循环模式选项
+            // 如果需要分页器
+            pagination: {
+                el: '.swiper-pagination',
+            },
+            // 如果需要前进后退按钮
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        })
+
+        var floor1Swiper = new Swiper('#floor1Swiper', {
+            loop: true, // 循环模式选项
+
+            // 如果需要分页器
+            pagination: {
+                el: '.swiper-pagination',
+            },
+
+            // 如果需要前进后退按钮
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            }
+        })
+
+    }
 }
 </script>
 <style scoped lang="less">

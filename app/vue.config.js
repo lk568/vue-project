@@ -11,6 +11,12 @@ module.exports = defineConfig({
     },
     headers: {
       'Access-Control-Allow-Origin': '*',
-    }
-  }
+    },
+    // 代理配置
+    proxy: {
+      '/api': {
+        target: 'http://gmall-h5-api.atguigu.cn',
+      },
+    },
+  },
 })
