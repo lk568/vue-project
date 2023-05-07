@@ -1,3 +1,4 @@
+// search模块的小仓库
 const state = {
 
 }

@@ -1,4 +1,4 @@
-// vuex状态库
+// vuex总状态库
 // 引入
 import Vue from "vue"
 import Vuex from "vuex"

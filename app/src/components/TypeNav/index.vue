@@ -2,47 +2,62 @@
   <!-- 商品分类导航 -->
   <div class="type-nav">
     <div class="container">
-        <!-- 全部商品分类和三级列表外包一个盒子，把鼠标移出事件放在这，就可以实现只有移出全部商品分类时背景色才会消失 -->
-        <!-- 利用了事件委托 -->
-      <div @mouseleave="leaveIndex">
+      <!-- 全部商品分类和三级列表外包一个盒子，把鼠标移出事件放在这，就可以实现只有移出全部商品分类时背景色才会消失 -->
+      <!-- 利用了事件委托 -->
+      <div @mouseleave="leaveShow" @mouseenter="enterShow">
         <h2 class="all">全部商品分类</h2>
-        <div class="sort">
-          <div class="all-sort-list2">
-            <div
-              class="item"
-              v-for="(c1, index) in categoryList"
-              :key="c1.categoryId"
-            >
-              <h3
-                @mouseenter="changeIndex(index)"
-                :class="{ cur: currentIndex === index }"
+        <transition name="sort">
+          <div class="sort" v-show="isShow">
+            <div class="all-sort-list2">
+              <div
+                class="item"
+                v-for="(c1, index) in categoryList"
+                :key="c1.categoryId"
+                @click="goSearch"
               >
-                <a href="">{{ c1.categoryName }}</a>
-              </h3>
-              <div class="item-list clearfix">
-                <div
-                  class="subitem"
-                  v-for="(c2) in c1.categoryChild"
-                  :key="c2.categoryId"
+                <h3
+                  @mouseenter="changeIndex(index)"
+                  :class="{ cur: currentIndex === index }"
                 >
-                  <dl class="fore">
-                    <dt>
-                      <a href="">{{ c2.categoryName }}</a>
-                    </dt>
-                    <dd>
-                      <em
-                        v-for="(c3) in c2.categoryChild"
-                        :key="c3.categoryId"
-                      >
-                        <a href="">{{ c3.categoryName }}</a>
-                      </em>
-                    </dd>
-                  </dl>
+                  <a
+                    :data-categoryName="c1.categoryName"
+                    :data-category1Id="c1.categoryId"
+                    >{{ c1.categoryName }}</a
+                  >
+                </h3>
+                <!-- 二级和三级分类 -->
+                <!-- 使用v-show或者:style控制二三级分类的显示与隐藏 使用v-show的话item-list类不能加display属性 -->
+                <div class="item-list clearfix" v-show="currentIndex === index">
+                  <!-- <div class="item-list clearfix" :style="{display:currentIndex === index ? 'block':'none'}"> -->
+                  <div
+                    class="subitem"
+                    v-for="c2 in c1.categoryChild"
+                    :key="c2.categoryId"
+                  >
+                    <dl class="fore">
+                      <dt>
+                        <a
+                          :data-categoryName="c2.categoryName"
+                          :data-category2Id="c2.categoryId"
+                          >{{ c2.categoryName }}</a
+                        >
+                      </dt>
+                      <dd>
+                        <em v-for="c3 in c2.categoryChild" :key="c3.categoryId">
+                          <a
+                            :data-categoryName="c3.categoryName"
+                            :data-category3Id="c3.categoryId"
+                            >{{ c3.categoryName }}</a
+                          >
+                        </em>
+                      </dd>
+                    </dl>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </transition>
       </div>
       <nav class="nav">
         <a href="###">服装城</a>
@@ -58,12 +73,19 @@
   </div>
 </template>
 <script>
+// 引入mapState获取仓库数据
 import { mapState } from "vuex";
+// 引入lodash  这是将lodash所有函数都引入了,不好
+// import _ from "lodash";
+// 最好按需加载 是默认暴露不需要{}
+import throttle from "lodash/throttle";
 export default {
   name: "type-nav",
   data() {
     return {
       currentIndex: -1,
+      // 控制Search页面的三级列表显示和隐藏
+      isShow: true,
     };
   },
   // 组件挂载完毕，可以向服务器发送请求
@@ -71,9 +93,13 @@ export default {
     // 派发请求给vuex actions
     // 通知Vuex发送请求，让其actions获取数据，存储到仓库
     this.$store.dispatch("home/categoryList");
+    // 判断如果不是home页面，就隐藏商品分类列表
+    if (this.$route.path != "/home") {
+      this.isShow = false;
+    }
   },
   computed: {
-    // 获取vuex仓库数据
+    // 通过mapState获取vuex仓库数据
     ...mapState({
       categoryList: (state) => {
         return state.home.categoryList.slice(0, 16);
@@ -81,11 +107,45 @@ export default {
     }),
   },
   methods: {
-    changeIndex(index) {
+    // 用于修改组件实例身上的currentIndex值
+    changeIndex: throttle(function (index) {
       this.currentIndex = index;
-    },
-    leaveIndex() {
+    }, 50),
+    // 鼠标移出 商品列表一级列表隐藏
+    leaveShow() {
       this.currentIndex = -1;
+      if (this.$route.path != "/home") {
+        this.isShow = false;
+      }
+    },
+    // 鼠标移入 商品列表一级列表显示
+    enterShow() {
+      this.isShow = true;
+    },
+    // 进行路由跳转的方法
+    goSearch(event) {
+      // 最好解决办法：编程式导航 + 事件委托 + 自定义属性data-categoryName、data-category1Id
+      // 解构自定义属性dataset
+      let { categoryname, category1id, category2id, category3id } =
+        event.target.dataset;
+      // 如果标签身上有categoryname一定是a标签
+      if (event.target.tagName === "A") {
+        // 整理路由跳转所需参数
+        let location = { name: "search" };
+        let query = { categoryName: categoryname };
+        // 通过自定义属性categoryxid判断是几级列表，给query添加category?id属性
+        if (category1id) {
+          query.category1Id = category1id;
+        } else if (category2id) {
+          query.category2Id = category2id;
+        } else if (category3id) {
+          query.category3Id = category3id;
+        }
+        // 合并路由跳转所需参数  this.$router.push({name:"search",params:{}})
+        location.query = query;
+        // 路由跳转
+        this.$router.push(location);
+      }
     },
   },
 };
@@ -153,7 +213,7 @@ export default {
           //   }
 
           .item-list {
-            display: none;
+            // display: none;
             position: absolute;
             width: 734px;
             min-height: 460px;
@@ -206,13 +266,42 @@ export default {
             }
           }
 
-          &:hover {
-            .item-list {
-              display: block;
-            }
-          }
+          // &:hover {
+          //   .item-list {
+          //     display: block;
+          //   }
+          // }
         }
       }
+    }
+    //过渡动画的样式
+    //  过渡动画开始状态（进入）
+    .sort-enter {
+      height: 0px;
+      transform: rotate(0deg);
+    }
+    //  过渡动画结束状态（进入）
+    .sort-enter-to {
+      height: 463px;
+      transform: rotate(360deg);
+    }
+    // 定义动画的时间、速率 (进入)
+    .sort-enter-active {
+      overflow: hidden;
+      transition: all 0.5s linear;
+    }
+    //  过渡动画开始状态（移出）
+    .sort-leave{
+      height: 463px;
+    }
+    //  过渡动画结束状态（移出）
+    .sort-leave-to{
+      height: 0px;
+    }
+    //  定义动画的时间、速率（移出）
+    .sort-leave-active{
+      overflow: hidden;
+      transition: all .5s linear;
     }
   }
 }

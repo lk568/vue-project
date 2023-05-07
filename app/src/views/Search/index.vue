@@ -1,8 +1,10 @@
+<!-- 这是Search模块 -->
 <template>
    <div>
       <h1>我是搜索页面</h1>
       <h2>params参数---{{ $route.params.keyword }}-------{{ keyword }}</h2>
       <h2>query参数---{{ $route.query.k }}-------{{ k }}</h2>
+      <type-nav></type-nav>
    </div>
 </template>
 <script>
