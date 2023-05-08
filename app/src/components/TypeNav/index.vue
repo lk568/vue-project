@@ -6,6 +6,7 @@
       <!-- 利用了事件委托 -->
       <div @mouseleave="leaveShow" @mouseenter="enterShow">
         <h2 class="all">全部商品分类</h2>
+        <!-- transition标签，动画标签，过渡样式：用类v-enter/leave等设置；如果设置了name属性，类名为<name>-enter/leave -->
         <transition name="sort">
           <div class="sort" v-show="isShow">
             <div class="all-sort-list2">
@@ -90,9 +91,6 @@ export default {
   },
   // 组件挂载完毕，可以向服务器发送请求
   mounted() {
-    // 派发请求给vuex actions
-    // 通知Vuex发送请求，让其actions获取数据，存储到仓库
-    this.$store.dispatch("home/categoryList");
     // 判断如果不是home页面，就隐藏商品分类列表
     if (this.$route.path != "/home") {
       this.isShow = false;
@@ -124,6 +122,7 @@ export default {
     },
     // 进行路由跳转的方法
     goSearch(event) {
+      // 跳转时携带参数
       // 最好解决办法：编程式导航 + 事件委托 + 自定义属性data-categoryName、data-category1Id
       // 解构自定义属性dataset
       let { categoryname, category1id, category2id, category3id } =
@@ -140,6 +139,11 @@ export default {
           query.category2Id = category2id;
         } else if (category3id) {
           query.category3Id = category3id;
+        }
+        // 先判断有没有带params参数，如果有params参数，那么路由跳转时带上params参数
+        // console.log("this.$route.params",this.$route.params);
+        if (Object.keys(this.$route.params).length!==0) {
+          location.params = this.$route.params;
         }
         // 合并路由跳转所需参数  this.$router.push({name:"search",params:{}})
         location.query = query;
@@ -278,12 +282,12 @@ export default {
     //  过渡动画开始状态（进入）
     .sort-enter {
       height: 0px;
-      transform: rotate(0deg);
+      // transform: rotate(0deg);
     }
     //  过渡动画结束状态（进入）
     .sort-enter-to {
       height: 463px;
-      transform: rotate(360deg);
+      // transform: rotate(360deg);
     }
     // 定义动画的时间、速率 (进入)
     .sort-enter-active {
@@ -291,17 +295,17 @@ export default {
       transition: all 0.5s linear;
     }
     //  过渡动画开始状态（移出）
-    .sort-leave{
+    .sort-leave {
       height: 463px;
     }
     //  过渡动画结束状态（移出）
-    .sort-leave-to{
+    .sort-leave-to {
       height: 0px;
     }
     //  定义动画的时间、速率（移出）
-    .sort-leave-active{
+    .sort-leave-active {
       overflow: hidden;
-      transition: all .5s linear;
+      transition: all 0.5s linear;
     }
   }
 }
