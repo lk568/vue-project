@@ -12,8 +12,7 @@
     <!-- 使用Like组件 -->
     <Like></Like>
     <!-- 使用FLoor组件 -->
-    <Floor></Floor>
-    <Floor></Floor>
+    <Floor v-for="floor in floorList" :key="floor.id" :list="floor"></Floor>
     <!-- 使用Brand组件 -->
     <Brand></Brand>
   </div>
@@ -27,7 +26,7 @@ import Like from "@/views/Home/Like";
 import Floor from "@/views/Home/Floor";
 import Brand from "@/views/Home/Brand";
 // 引入mapState获取vuex中的数据
-import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
+import { mapState } from "vuex";
 export default {
   name: "",
   components: {
@@ -37,6 +36,17 @@ export default {
     Like,
     Floor,
     Brand,
+  },
+  mounted(){
+    // action需要在home中派发，因为有两个FLoor组件，需要用v-for遍历Floor组件【props传递数据父传子】
+    this.$store.dispatch("home/floorList");
+  },
+  computed:{
+    ...mapState({
+      floorList:(state)=>{
+        return state.home.floorList;
+      }
+    })
   },
   
 };

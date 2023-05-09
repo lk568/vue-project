@@ -4,28 +4,7 @@
     <div class="sortList clearfix">
       <div class="center">
         <!--banner轮播-->
-        <div class="swiper-container" id="mySwiper">
-          <div class="swiper-wrapper">
-            <div class="swiper-slide">
-              <img src="./images/banner1.jpg" />
-            </div>
-            <div class="swiper-slide">
-              <img src="./images/banner2.jpg" />
-            </div>
-            <div class="swiper-slide">
-              <img src="./images/banner3.jpg" />
-            </div>
-            <div class="swiper-slide">
-              <img src="./images/banner4.jpg" />
-            </div>
-          </div>
-          <!-- 如果需要分页器 -->
-          <div class="swiper-pagination"></div>
-
-          <!-- 如果需要导航按钮 -->
-          <div class="swiper-button-prev"></div>
-          <div class="swiper-button-next"></div>
-        </div>
+        <Carousel :list="bannerList"></Carousel>
       </div>
       <div class="right">
         <div class="news">
@@ -100,41 +79,18 @@
   </div>
 </template>
 <script>
-// 引入swiper包
-import Swiper from "swiper";
+// 引入vuex仓库数据
 import { mapState } from "vuex";
 export default {
   mounted() {
     // 派发action给mock 获取banner数据 这里要加home 在根组件中派发提高性能
     // this.$store.dispatch("home/bannerList");
-    // var mySwiper = new Swiper('#mySwiper', {
-    //     loop: true, // 循环模式选项
-    //     // 如果需要分页器
-    //     pagination: {
-    //         el: '.swiper-pagination',
-    //     },
-    //     // 如果需要前进后退按钮
-    //     navigation: {
-    //         nextEl: '.swiper-button-next',
-    //         prevEl: '.swiper-button-prev',
-    //     },
-    // })
-
-    // var floor1Swiper = new Swiper('#floor1Swiper', {
-    //     loop: true, // 循环模式选项
-
-    //     // 如果需要分页器
-    //     pagination: {
-    //         el: '.swiper-pagination',
-    //     },
-
-    //     // 如果需要前进后退按钮
-    //     navigation: {
-    //         nextEl: '.swiper-button-next',
-    //         prevEl: '.swiper-button-prev',
-    //     }
-    // })
+    
   },
+// 监听bannerList数据，发生改变就执行headler函数
+  // 利用watch监听这一点还不能实现轮播图切换【因为watch只是保证了数据变化，但保证不了真正更新真实DOM元素】【swiper要保证DOM元素结构完整才有效】
+  // nextTick：在下次 DOM 更新循环(v-for)结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
+  // 封装在了全局组件Carousel中
   computed: {
     // 通过mapState获取vuex仓库数据
     ...mapState({

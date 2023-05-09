@@ -21,10 +21,10 @@ export const reqBannerList = ()=>{
         method:"get"
     })
 }
-// mock banner轮播图接口
-// export const reqFloorList = ()=>{
-//     return mockRequests({
-//         url:"/floor",
-//         method:"get"
-//     })
-// }
+// mock floor轮播图接口
+export const reqFloorList = ()=>{
+    return mockRequests({
+        url:"/floor",
+        method:"get"
+    })
+}

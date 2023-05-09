@@ -3,23 +3,25 @@ Vue.config.productionTip = false
 
 import Vue from 'vue'
 import App from './App.vue'
-// 引入swiper
-import "swiper/css/swiper.css"
 // 三级联动组件---全局组件
-import TypeNav from "@/components/TypeNav"
+import TypeNav from "@/components/TypeNav";
+import Carousel from "@/components/Carousel";
 // 注册全局组件Vue.component 第一个参数：全局组件的名字TypeNav.name, 第二个参数：哪一个组件TypeNav
 Vue.component(TypeNav.name, TypeNav)
+Vue.component(Carousel.name, Carousel)
 
 // 引入路由1
 import router from "@/router"
 
-// 测试请求
+// 测试请求，用来测试接口api是否出错
 import { reqCategoryList } from '@/api'
 // reqCategoryList().catch((err) => {
 //   console.log("测试请求错误")
 // })
 // 引入仓库
 import store from '@/store'
+// 引入swiper样式
+import "swiper/css/swiper.css"
 // 引入mock数据
 import "@/mock/mockServer"
 new Vue({
