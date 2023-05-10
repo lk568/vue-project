@@ -15,16 +15,40 @@ export const reqCategoryList = () => {
 }
 
 // mock banner轮播图接口
-export const reqBannerList = ()=>{
+export const reqBannerList = () => {
     return mockRequests({
-        url:"/banner",
-        method:"get"
+        url: "/banner",
+        method: "get"
     })
 }
 // mock floor轮播图接口
-export const reqFloorList = ()=>{
+export const reqFloorList = () => {
     return mockRequests({
-        url:"/floor",
-        method:"get"
+        url: "/floor",
+        method: "get"
+    })
+}
+
+// search接口  /api/list   POST   有参数
+/* 参数示例 
+{
+    "category1Id": "61",
+    "category2Id": "61",
+    "category3Id": "61",
+    "categoryName": "手机",
+    "keyword": "小米",
+    "order": "1:desc",
+    "pageNo": 1,
+    "pageSize": 10,
+    "props": ["1:1700-2799:价格", "2:6.65-6.74英寸:屏幕尺寸"],
+    "trademark": "4:小米"
+  } */
+
+//   params由搜索页派发actions第二个参数 传递过来  至少是一个空对象
+export const reqSearchList = (params) => {
+    return requests({
+        url: "/list",
+        method:"POST",
+        data:params
     })
 }

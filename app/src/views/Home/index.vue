@@ -42,9 +42,9 @@ export default {
     this.$store.dispatch("home/floorList");
   },
   computed:{
-    ...mapState({
+    ...mapState("home",{
       floorList:(state)=>{
-        return state.home.floorList;
+        return state.floorList;
       }
     })
   },

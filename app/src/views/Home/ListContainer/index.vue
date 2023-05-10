@@ -92,12 +92,14 @@ export default {
   // nextTick：在下次 DOM 更新循环(v-for)结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
   // 封装在了全局组件Carousel中
   computed: {
-    // 通过mapState获取vuex仓库数据
-    ...mapState({
-      bannerList: (state) => {
-        return state.home.bannerList;
-      },
-    }),
+    // 通过mapState获取vuex仓库数据 对象和数组写法
+    // ...mapState("home",{
+    //   bannerList: (state) => {
+    //     return state.bannerList;
+    //   },
+    // }),
+    ...mapState("home",["bannerList"]
+      ),
   },
 };
 </script>

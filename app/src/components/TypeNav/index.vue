@@ -98,9 +98,9 @@ export default {
   },
   computed: {
     // 通过mapState获取vuex仓库数据
-    ...mapState({
+    ...mapState("home",{
       categoryList: (state) => {
-        return state.home.categoryList.slice(0, 16);
+        return state.categoryList.slice(0, 16);
       },
     }),
   },
