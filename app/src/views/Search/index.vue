@@ -49,7 +49,7 @@
           </div>
           <div class="goods-list">
             <ul class="yui3-g">
-              <li class="yui3-u-1-5" v-for="(goods) in goodsList" :key="goods.id">
+              <li class="yui3-u-1-5" v-for="goods in goodsList" :key="goods.id">
                 <div class="list-wrap">
                   <div class="p-img">
                     <a href="item.html" target="_blank"
@@ -85,7 +85,7 @@
                     >
                   </div>
                 </div>
-              </li>              
+              </li>
             </ul>
           </div>
           <!-- 分页器 -->
@@ -214,14 +214,56 @@ export default {
   name: "Search",
   // 路由组件可以传递props
   // props:['a','b']
-  props: ["keyword", "k"],
+  props:["keyword","k"],
+  data() {
+    return {
+      serachParams: {
+        // 一级分类Id
+        category1Id: "",
+        // 二级分类Id
+        category2Id: "",
+        // 三级分类Id
+        category3Id: "",
+        // 分类名字
+        categoryName: "",
+        // 用户搜索框中输入的关键字
+        keyword: "",
+        // 排序
+        order: "",
+        // 分页器，显示第几页
+        pageNo: 1,
+        // 每一页显示的数据个数
+        pageSize: 10,
+        // 平台操作页点击时携带的参数
+        props: [],
+        // 品牌名
+        trademark: "",
+      },
+    };
+  },
   components: {
     SearchSelector,
   },
+  beforeMount() {
+    // 确保在第一次【从home跳转到search】发送请求之前，将改变后的参数带给服务器【将发送请求携带的参数做修改】
+    this.serachParams={...this.serachParams,...this.$route.query,...this.$route.params}
+    // console.log("发请求之前更新数据",this.serachParams);
+  },
   mounted() {
-    // 测试接口返回的数据格式，第二个参数要传递一个对象
-    this.$store.dispatch("search/searchList", {});
-    // console.log(reqSearchList())
+    this.getData();
+  },
+  watch:{
+    // 监听$route是否发生变化，来确定是否需要重新发送请求
+    $route(newValue,oldValue){
+      // 每次请求之前清除上次请求缓存的categoryxId值，确保本次请求中不包含多余的categoryxId值
+      // 例如【上次请求携带的为category3Id，本次请求是category1Id那么就不需要再携带category3Id了】
+      this.serachParams.category1Id=""
+      this.serachParams.category2Id=""
+      this.serachParams.category3Id=""
+      // 只需要清除这三级分类的id，其他的不需要清除【如果清除其他的，那么请求不就是白发了】 
+      this.serachParams={...this.serachParams,...this.$route.query,...this.$route.params}
+      this.getData()
+    }
   },
   computed: {
     // ...mapState({
@@ -236,6 +278,12 @@ export default {
       attrsList: (state) => state.searchList.attrsList || [],
       trademarkList: (state) => state.searchList.trademarkList || [],
     }),
+  },
+  methods: {
+    getData() {
+      // 接口返回的数据格式，第二个参数要传递一个对象
+      this.$store.dispatch("search/searchList", this.serachParams);
+    },
   },
 };
 </script>
