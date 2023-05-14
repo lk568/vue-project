@@ -13,14 +13,26 @@
             </li>
           </ul>
           <ul class="fl sui-tag">
+            <!-- 三级分类的面包屑 -->
             <li class="with-x" v-if="serachParams.categoryName">
               {{ serachParams.categoryName
               }}<i @click="removeCategoryName">×</i>
             </li>
+            <!-- 搜索框关键字的面包屑 -->
+            <li class="with-x" v-if="serachParams.keyword">
+              {{ serachParams.keyword
+              }}<i @click="removeKeyword">×</i>
+            </li>
+            <!-- 品牌的面包屑  这里对品牌id和name做了字符串分隔，因为传递的参数是"ID:Name",但只需要展示name-->
+            <!-- 注意：如果用v-show，删除面包屑时不能将trademark置为undefined，会报错因为undefined读取不了split，因为v-show是隐藏元素但是结构还在；而v-if是直接删除元素结构不在了。如果非要使用v-show，只能是将trademark置为空字符串"",对空字符串分隔不会报错-->
+            <li class="with-x" v-if="serachParams.trademark">
+              {{ serachParams.trademark.split(":")[1]
+              }}<i @click="removeTrademark">×</i>
+            </li>
           </ul>
         </div>
         <!--selector-->
-        <SearchSelector></SearchSelector>
+        <SearchSelector @trademarksInfo="trademarksInfo"></SearchSelector>
         <!--details-->
         <div class="details clearfix">
           <div class="sui-navbar">
@@ -293,6 +305,7 @@ export default {
       // 接口返回的数据格式，第二个参数要传递一个对象
       this.$store.dispatch("search/searchList", this.serachParams);
     },
+    // 删除分类的名字
     removeCategoryName() {
       // 删除面包屑 ，删除:清空name和id,然后重新发送请求
       // 带给服务器的参数都是可选的，不需要的参数可以置为空字符串，但如果是空字符串仍然会将参数带给服务器，可以将其置为undefined，就不会带给服务器了，可以提高性能
@@ -300,12 +313,40 @@ export default {
       this.serachParams.category1Id = undefined;
       this.serachParams.category2Id = undefined;
       this.serachParams.category3Id = undefined;
-      // this.getData()
+      // this.getData()  下面有路由跳转会发送请求，不需要再发送请求了，不然会发送2次请求
       // 进行路由跳转，清除地址栏中的query参数，但还要保留params参数；即如果params参数存在就
       if(this.$route.params){
         this.$router.push({name:"search",params:this.$route.params})
       }
     },
+    // 删除关键字
+    removeKeyword() {
+      // 删除面包屑 ，删除:清空keyword,然后重新发送请求
+      // 带给服务器的参数都是可选的，不需要的参数可以置为空字符串，但如果是空字符串仍然会将参数带给服务器，可以将其置为undefined，就不会带给服务器了，可以提高性能
+      this.serachParams.keyword = undefined;
+      // 使用事件总线（提供数据），通知兄弟组件Header清除关键字（搜索框中）
+      this.$bus.$emit("clear")
+      // this.getData()
+      // 进行路由跳转，清除地址栏中的params参数，但还要保留query参数；即如果query参数存在就
+      if(this.$route.query){
+        this.$router.push({name:"search",query:this.$route.query})
+      }
+    },
+    // 使用子组件传递的自定义事件trademarksInfo和品牌的数据
+    trademarksInfo(trademarksInfo){
+      // console.log("父组件",trademarksInfo);
+      // 整理品牌字段参数 "ID:品牌名称"
+      this.serachParams.trademark = `${trademarksInfo.tmId}:${trademarksInfo.tmName}`
+      // 发送请求
+      this.getData()
+    },
+    // 删除品牌面包屑及其信息
+    removeTrademark(){
+      // 删除后置空品牌信息
+      this.serachParams.trademark = undefined;
+      // 再次发送请求
+      this.getData()
+    }
   },
 };
 </script>

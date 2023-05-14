@@ -4,7 +4,7 @@
       <div class="fl key brand">品牌</div>
       <div class="value logos">
         <ul class="logo-list">
-          <li v-for="(trademarks) in trademarkList" :key="trademarks.tmId">{{ trademarks.tmName }}</li>
+          <li v-for="(trademarks) in trademarkList" :key="trademarks.tmId" @click="trademarkHandler(trademarks)">{{ trademarks.tmName }}</li>
         </ul>
       </div>
       <div class="ext">
@@ -36,6 +36,13 @@ export default {
       trademarkList:(state)=>state.searchList.trademarkList,
       attrsList:(state)=>state.searchList.attrsList
     })
+  },
+  methods:{
+    // 品牌事件的处理函数
+    trademarkHandler(trademarks){
+      // 使用自定义事件，给父组件传递数据
+      this.$emit("trademarksInfo",trademarks)
+    }
   }
 };
 </script>

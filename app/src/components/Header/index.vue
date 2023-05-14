@@ -105,6 +105,12 @@ export default {
       // console.log(this.$router.__proto__)
     },
   },
+  mounted(){
+    // 使用事件总线（接收数据），接收到兄弟组件Search的通知，清除搜索框信息
+    this.$bus.$on("clear",()=>{
+      this.keyword=''
+    })
+  }
 };
 </script>
 <style scoped lang="less">

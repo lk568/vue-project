@@ -26,6 +26,10 @@ import "swiper/css/swiper.css"
 import "@/mock/mockServer"
 new Vue({
   render: h => h(App),
+  // 配置全局事件总线（GlobalEventBus）
+  beforeCreate() {
+    Vue.prototype.$bus = this
+  },
   // 注册路由2：KV一致写法一般省略V，【router要小写】
   router,  // 注册后在根组件中设置路由出口<router-view></router-view>
   // 注册仓库:组件实例的身上会多一个属性$store
