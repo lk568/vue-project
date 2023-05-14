@@ -13,10 +13,10 @@
             </li>
           </ul>
           <ul class="fl sui-tag">
-            <li class="with-x">手机</li>
-            <li class="with-x">iphone<i>×</i></li>
-            <li class="with-x">华为<i>×</i></li>
-            <li class="with-x">OPPO<i>×</i></li>
+            <li class="with-x" v-if="serachParams.categoryName">
+              {{ serachParams.categoryName
+              }}<i @click="removeCategoryName">×</i>
+            </li>
           </ul>
         </div>
         <!--selector-->
@@ -214,7 +214,7 @@ export default {
   name: "Search",
   // 路由组件可以传递props
   // props:['a','b']
-  props:["keyword","k"],
+  props: ["keyword", "k"],
   data() {
     return {
       serachParams: {
@@ -246,24 +246,33 @@ export default {
   },
   beforeMount() {
     // 确保在第一次【从home跳转到search】发送请求之前，将改变后的参数带给服务器【将发送请求携带的参数做修改】
-    this.serachParams={...this.serachParams,...this.$route.query,...this.$route.params}
+    this.serachParams = {
+      ...this.serachParams,
+      ...this.$route.query,
+      ...this.$route.params,
+    };
     // console.log("发请求之前更新数据",this.serachParams);
   },
   mounted() {
     this.getData();
   },
-  watch:{
+  watch: {
     // 监听$route是否发生变化，来确定是否需要重新发送请求
-    $route(newValue,oldValue){
+    $route(newValue, oldValue) {
       // 每次请求之前清除上次请求缓存的categoryxId值，确保本次请求中不包含多余的categoryxId值
       // 例如【上次请求携带的为category3Id，本次请求是category1Id那么就不需要再携带category3Id了】
-      this.serachParams.category1Id=""
-      this.serachParams.category2Id=""
-      this.serachParams.category3Id=""
-      // 只需要清除这三级分类的id，其他的不需要清除【如果清除其他的，那么请求不就是白发了】 
-      this.serachParams={...this.serachParams,...this.$route.query,...this.$route.params}
-      this.getData()
-    }
+      // 带给服务器的参数都是可选的，不需要的参数可以置为空字符串，但如果是空字符串仍然会将参数带给服务器，可以将其置为undefined，就不会带给服务器了，可以提高性能
+      this.serachParams.category1Id = undefined;
+      this.serachParams.category2Id = undefined;
+      this.serachParams.category3Id = undefined;
+      // 只需要清除这三级分类的id，其他的不需要清除【如果清除其他的，那么请求不就是白发了】
+      this.serachParams = {
+        ...this.serachParams,
+        ...this.$route.query,
+        ...this.$route.params,
+      };
+      this.getData();
+    },
   },
   computed: {
     // ...mapState({
@@ -283,6 +292,19 @@ export default {
     getData() {
       // 接口返回的数据格式，第二个参数要传递一个对象
       this.$store.dispatch("search/searchList", this.serachParams);
+    },
+    removeCategoryName() {
+      // 删除面包屑 ，删除:清空name和id,然后重新发送请求
+      // 带给服务器的参数都是可选的，不需要的参数可以置为空字符串，但如果是空字符串仍然会将参数带给服务器，可以将其置为undefined，就不会带给服务器了，可以提高性能
+      this.serachParams.categoryName = undefined;
+      this.serachParams.category1Id = undefined;
+      this.serachParams.category2Id = undefined;
+      this.serachParams.category3Id = undefined;
+      // this.getData()
+      // 进行路由跳转，清除地址栏中的query参数，但还要保留params参数；即如果params参数存在就
+      if(this.$route.params){
+        this.$router.push({name:"search",params:this.$route.params})
+      }
     },
   },
 };
