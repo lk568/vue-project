@@ -20,8 +20,7 @@
             </li>
             <!-- 搜索框关键字的面包屑 -->
             <li class="with-x" v-if="searchParams.keyword">
-              {{ searchParams.keyword
-              }}<i @click="removeKeyword">×</i>
+              {{ searchParams.keyword }}<i @click="removeKeyword">×</i>
             </li>
             <!-- 品牌的面包屑  这里对品牌id和name做了字符串分隔，因为传递的参数是"ID:Name",但只需要展示name-->
             <!-- 注意：如果用v-show，删除面包屑时不能将trademark置为undefined，会报错因为undefined读取不了split，因为v-show是隐藏元素但是结构还在；而v-if是直接删除元素结构不在了。如果非要使用v-show，只能是将trademark置为空字符串"",对空字符串分隔不会报错-->
@@ -30,37 +29,50 @@
               }}<i @click="removeTrademark">×</i>
             </li>
             <!-- 平台属性信息的面包屑 这里用户每点击一个属性就显示一个面包屑，不能用v-if了，要用v-for -->
-            <li class="with-x" v-for="(attrValue,index) in searchParams.props" :key="index">
-              {{ attrValue.split(":")[1]
-              }}<i @click="removeAttr(index)">×</i>
+            <li
+              class="with-x"
+              v-for="(attrValue, index) in searchParams.props"
+              :key="index"
+            >
+              {{ attrValue.split(":")[1] }}<i @click="removeAttr(index)">×</i>
             </li>
           </ul>
         </div>
         <!--selector-->
-        <SearchSelector @trademarksInfo="trademarksInfo" @attrInfo="attrInfo"></SearchSelector>
+        <SearchSelector
+          @trademarksInfo="trademarksInfo"
+          @attrInfo="attrInfo"
+        ></SearchSelector>
         <!--details-->
         <div class="details clearfix">
           <div class="sui-navbar">
             <div class="navbar-inner filter">
               <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
+                <!-- 综合销量价格评价 切换栏 -->
+                <li
+                  :class="{ active: this.searchParams.order.includes('1') }"
+                  @click="changeOrder('1')"
+                >
+                  <!-- orderIcon决定是上还是下 v-if判断是否显示 -->
+                  <a>综合
+                    <i
+                      :class="orderIcon"
+                      v-if="this.searchParams.order.includes('1')"
+                    ></i></a>
                 </li>
-                <li>
-                  <a href="#">销量</a>
+                <li
+                  :class="{ active: this.searchParams.order.includes('2') }"
+                  @click="changeOrder('2')"
+                >
+                  <a>价格
+                    <i
+                      :class="orderIcon"
+                      v-if="this.searchParams.order.includes('2')"
+                    ></i></a>
                 </li>
-                <li>
-                  <a href="#">新品</a>
-                </li>
-                <li>
-                  <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
-                  <a href="#">价格⬇</a>
-                </li>
+                <!-- 下面两个没有对应数据，以后补充数据-->
+                <li><a>销量</a></li>
+                <li><a>评价</a></li>
               </ul>
             </div>
           </div>
@@ -246,7 +258,7 @@ export default {
         // 用户搜索框中输入的关键字
         keyword: "",
         // 排序
-        order: "",
+        order: "1:desc",
         // 分页器，显示第几页
         pageNo: 1,
         // 每一页显示的数据个数
@@ -304,6 +316,12 @@ export default {
       attrsList: (state) => state.searchList.attrsList || [],
       trademarkList: (state) => state.searchList.trademarkList || [],
     }),
+    // 判断Icon图标使用哪一个（上还是下）
+    orderIcon() {
+      return this.searchParams.order.split(":")[1] === "desc"
+        ? "el-icon-bottom"
+        : "el-icon-top";
+    },
   },
   methods: {
     getData() {
@@ -320,8 +338,8 @@ export default {
       this.searchParams.category3Id = undefined;
       // this.getData()  下面有路由跳转会发送请求，不需要再发送请求了，不然会发送2次请求
       // 进行路由跳转，清除地址栏中的query参数，但还要保留params参数；即如果params参数存在就
-      if(this.$route.params){
-        this.$router.push({name:"search",params:this.$route.params})
+      if (this.$route.params) {
+        this.$router.push({ name: "search", params: this.$route.params });
       }
     },
     // 删除关键字
@@ -330,49 +348,65 @@ export default {
       // 带给服务器的参数都是可选的，不需要的参数可以置为空字符串，但如果是空字符串仍然会将参数带给服务器，可以将其置为undefined，就不会带给服务器了，可以提高性能
       this.searchParams.keyword = undefined;
       // 使用事件总线（提供数据），通知兄弟组件Header清除关键字（搜索框中）
-      this.$bus.$emit("clear")
+      this.$bus.$emit("clear");
       // this.getData()
       // 进行路由跳转，清除地址栏中的params参数，但还要保留query参数；即如果query参数存在就
-      if(this.$route.query){
-        this.$router.push({name:"search",query:this.$route.query})
+      if (this.$route.query) {
+        this.$router.push({ name: "search", query: this.$route.query });
       }
     },
     // 使用子组件传递的自定义事件trademarksInfo和品牌的数据
-    trademarksInfo(trademarksInfo){
+    trademarksInfo(trademarksInfo) {
       // console.log("父组件",trademarksInfo);
       // 整理品牌字段参数 "ID:品牌名称"  重复点击同一个只发一次请求
-      if(this.searchParams.trademark!==`${trademarksInfo.tmId}:${trademarksInfo.tmName}`){
-        this.searchParams.trademark = `${trademarksInfo.tmId}:${trademarksInfo.tmName}`
+      if (
+        this.searchParams.trademark !==
+        `${trademarksInfo.tmId}:${trademarksInfo.tmName}`
+      ) {
+        this.searchParams.trademark = `${trademarksInfo.tmId}:${trademarksInfo.tmName}`;
         // 发送请求
-        this.getData()
+        this.getData();
       }
     },
     // 删除品牌面包屑及其信息
-    removeTrademark(){
+    removeTrademark() {
       // 删除后置空品牌信息
       this.searchParams.trademark = undefined;
       // 再次发送请求
-      this.getData()
+      this.getData();
     },
     // 平台售卖信息属性的信息，（自定义事件，由子组件传递过来）
-    attrInfo(attrs,attrValue){
+    attrInfo(attrs, attrValue) {
       // console.log(attrs,attrValue);
       // 整理数据参数，将数据赋给父组件 "id:属性值:属性名"
-      let props = `${attrs.attrId}:${attrValue}:${attrs.attrName}`
+      let props = `${attrs.attrId}:${attrValue}:${attrs.attrName}`;
       // 对数据去重，重复点击无效，每个属性只显示一次
-      if(this.searchParams.props.indexOf(props)===-1){
-        this.searchParams.props.push(props)
+      if (this.searchParams.props.indexOf(props) === -1) {
+        this.searchParams.props.push(props);
         // this.searchParams.props = [...new Set(this.searchParams.props)]
-        this.getData()
+        this.getData();
       }
-      
     },
     // 删除平台售卖信息面包屑
-    removeAttr(index){
-      this.searchParams.props.splice(index,1)
+    removeAttr(index) {
+      this.searchParams.props.splice(index, 1);
       // 再次发送请求
-      this.getData()
-    }
+      this.getData();
+    },
+    // 排序的
+    changeOrder(newOrderFlag) {
+      let [orderFlag, orderType] = this.searchParams.order.split(":");
+      if (newOrderFlag === orderFlag) {
+        orderType = orderType === "desc" ? "asc" : "desc";
+      } else {
+        orderFlag = newOrderFlag;
+        orderType = "desc";
+      }
+      // 改变排序状态 "1/2:desc/asc"
+      this.searchParams.order = `${orderFlag}:${orderType}`;
+      // 再次发送请求
+      this.getData();
+    },
   },
 };
 </script>
