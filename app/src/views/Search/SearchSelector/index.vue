@@ -16,7 +16,7 @@
       <div class="fl key">{{ attrs.attrName }}</div>
       <div class="fl value">
         <ul class="type-list">
-          <li v-for="(attrValue,index) in attrs.attrValueList" :key="index">
+          <li v-for="(attrValue,index) in attrs.attrValueList" :key="index" @click="attrHandler(attrs,attrValue)">
             <a>{{ attrValue }}</a>
           </li>
           
@@ -42,6 +42,9 @@ export default {
     trademarkHandler(trademarks){
       // 使用自定义事件，给父组件传递数据
       this.$emit("trademarksInfo",trademarks)
+    },
+    attrHandler(attrs,attrValue){
+      this.$emit("attrInfo",attrs,attrValue)
     }
   }
 };
@@ -99,6 +102,9 @@ export default {
           img {
             max-width: 100%;
             vertical-align: middle;
+          }
+          &:hover{
+            cursor: pointer;
           }
         }
       }

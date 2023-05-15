@@ -14,25 +14,30 @@
           </ul>
           <ul class="fl sui-tag">
             <!-- 三级分类的面包屑 -->
-            <li class="with-x" v-if="serachParams.categoryName">
-              {{ serachParams.categoryName
+            <li class="with-x" v-if="searchParams.categoryName">
+              {{ searchParams.categoryName
               }}<i @click="removeCategoryName">×</i>
             </li>
             <!-- 搜索框关键字的面包屑 -->
-            <li class="with-x" v-if="serachParams.keyword">
-              {{ serachParams.keyword
+            <li class="with-x" v-if="searchParams.keyword">
+              {{ searchParams.keyword
               }}<i @click="removeKeyword">×</i>
             </li>
             <!-- 品牌的面包屑  这里对品牌id和name做了字符串分隔，因为传递的参数是"ID:Name",但只需要展示name-->
             <!-- 注意：如果用v-show，删除面包屑时不能将trademark置为undefined，会报错因为undefined读取不了split，因为v-show是隐藏元素但是结构还在；而v-if是直接删除元素结构不在了。如果非要使用v-show，只能是将trademark置为空字符串"",对空字符串分隔不会报错-->
-            <li class="with-x" v-if="serachParams.trademark">
-              {{ serachParams.trademark.split(":")[1]
+            <li class="with-x" v-if="searchParams.trademark">
+              {{ searchParams.trademark.split(":")[1]
               }}<i @click="removeTrademark">×</i>
+            </li>
+            <!-- 平台属性信息的面包屑 这里用户每点击一个属性就显示一个面包屑，不能用v-if了，要用v-for -->
+            <li class="with-x" v-for="(attrValue,index) in searchParams.props" :key="index">
+              {{ attrValue.split(":")[1]
+              }}<i @click="removeAttr(index)">×</i>
             </li>
           </ul>
         </div>
         <!--selector-->
-        <SearchSelector @trademarksInfo="trademarksInfo"></SearchSelector>
+        <SearchSelector @trademarksInfo="trademarksInfo" @attrInfo="attrInfo"></SearchSelector>
         <!--details-->
         <div class="details clearfix">
           <div class="sui-navbar">
@@ -229,7 +234,7 @@ export default {
   props: ["keyword", "k"],
   data() {
     return {
-      serachParams: {
+      searchParams: {
         // 一级分类Id
         category1Id: "",
         // 二级分类Id
@@ -258,12 +263,12 @@ export default {
   },
   beforeMount() {
     // 确保在第一次【从home跳转到search】发送请求之前，将改变后的参数带给服务器【将发送请求携带的参数做修改】
-    this.serachParams = {
-      ...this.serachParams,
+    this.searchParams = {
+      ...this.searchParams,
       ...this.$route.query,
       ...this.$route.params,
     };
-    // console.log("发请求之前更新数据",this.serachParams);
+    // console.log("发请求之前更新数据",this.searchParams);
   },
   mounted() {
     this.getData();
@@ -274,12 +279,12 @@ export default {
       // 每次请求之前清除上次请求缓存的categoryxId值，确保本次请求中不包含多余的categoryxId值
       // 例如【上次请求携带的为category3Id，本次请求是category1Id那么就不需要再携带category3Id了】
       // 带给服务器的参数都是可选的，不需要的参数可以置为空字符串，但如果是空字符串仍然会将参数带给服务器，可以将其置为undefined，就不会带给服务器了，可以提高性能
-      this.serachParams.category1Id = undefined;
-      this.serachParams.category2Id = undefined;
-      this.serachParams.category3Id = undefined;
+      this.searchParams.category1Id = undefined;
+      this.searchParams.category2Id = undefined;
+      this.searchParams.category3Id = undefined;
       // 只需要清除这三级分类的id，其他的不需要清除【如果清除其他的，那么请求不就是白发了】
-      this.serachParams = {
-        ...this.serachParams,
+      this.searchParams = {
+        ...this.searchParams,
         ...this.$route.query,
         ...this.$route.params,
       };
@@ -303,16 +308,16 @@ export default {
   methods: {
     getData() {
       // 接口返回的数据格式，第二个参数要传递一个对象
-      this.$store.dispatch("search/searchList", this.serachParams);
+      this.$store.dispatch("search/searchList", this.searchParams);
     },
     // 删除分类的名字
     removeCategoryName() {
       // 删除面包屑 ，删除:清空name和id,然后重新发送请求
       // 带给服务器的参数都是可选的，不需要的参数可以置为空字符串，但如果是空字符串仍然会将参数带给服务器，可以将其置为undefined，就不会带给服务器了，可以提高性能
-      this.serachParams.categoryName = undefined;
-      this.serachParams.category1Id = undefined;
-      this.serachParams.category2Id = undefined;
-      this.serachParams.category3Id = undefined;
+      this.searchParams.categoryName = undefined;
+      this.searchParams.category1Id = undefined;
+      this.searchParams.category2Id = undefined;
+      this.searchParams.category3Id = undefined;
       // this.getData()  下面有路由跳转会发送请求，不需要再发送请求了，不然会发送2次请求
       // 进行路由跳转，清除地址栏中的query参数，但还要保留params参数；即如果params参数存在就
       if(this.$route.params){
@@ -323,7 +328,7 @@ export default {
     removeKeyword() {
       // 删除面包屑 ，删除:清空keyword,然后重新发送请求
       // 带给服务器的参数都是可选的，不需要的参数可以置为空字符串，但如果是空字符串仍然会将参数带给服务器，可以将其置为undefined，就不会带给服务器了，可以提高性能
-      this.serachParams.keyword = undefined;
+      this.searchParams.keyword = undefined;
       // 使用事件总线（提供数据），通知兄弟组件Header清除关键字（搜索框中）
       this.$bus.$emit("clear")
       // this.getData()
@@ -335,15 +340,36 @@ export default {
     // 使用子组件传递的自定义事件trademarksInfo和品牌的数据
     trademarksInfo(trademarksInfo){
       // console.log("父组件",trademarksInfo);
-      // 整理品牌字段参数 "ID:品牌名称"
-      this.serachParams.trademark = `${trademarksInfo.tmId}:${trademarksInfo.tmName}`
-      // 发送请求
-      this.getData()
+      // 整理品牌字段参数 "ID:品牌名称"  重复点击同一个只发一次请求
+      if(this.searchParams.trademark!==`${trademarksInfo.tmId}:${trademarksInfo.tmName}`){
+        this.searchParams.trademark = `${trademarksInfo.tmId}:${trademarksInfo.tmName}`
+        // 发送请求
+        this.getData()
+      }
     },
     // 删除品牌面包屑及其信息
     removeTrademark(){
       // 删除后置空品牌信息
-      this.serachParams.trademark = undefined;
+      this.searchParams.trademark = undefined;
+      // 再次发送请求
+      this.getData()
+    },
+    // 平台售卖信息属性的信息，（自定义事件，由子组件传递过来）
+    attrInfo(attrs,attrValue){
+      // console.log(attrs,attrValue);
+      // 整理数据参数，将数据赋给父组件 "id:属性值:属性名"
+      let props = `${attrs.attrId}:${attrValue}:${attrs.attrName}`
+      // 对数据去重，重复点击无效，每个属性只显示一次
+      if(this.searchParams.props.indexOf(props)===-1){
+        this.searchParams.props.push(props)
+        // this.searchParams.props = [...new Set(this.searchParams.props)]
+        this.getData()
+      }
+      
+    },
+    // 删除平台售卖信息面包屑
+    removeAttr(index){
+      this.searchParams.props.splice(index,1)
       // 再次发送请求
       this.getData()
     }

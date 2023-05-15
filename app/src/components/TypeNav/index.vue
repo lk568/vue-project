@@ -125,8 +125,7 @@ export default {
       // 跳转时携带参数
       // 最好解决办法：编程式导航 + 事件委托 + 自定义属性data-categoryName、data-category1Id
       // 解构自定义属性dataset
-      let { categoryname, category1id, category2id, category3id } =
-        event.target.dataset;
+      let { categoryname, category1id, category2id, category3id } = event.target.dataset;
       // 如果标签身上有categoryname一定是a标签
       if (event.target.tagName === "A") {
         // 整理路由跳转所需参数
@@ -295,18 +294,18 @@ export default {
       transition: all 0.5s linear;
     }
     //  过渡动画开始状态（移出）
-    .sort-leave {
-      height: 463px;
-    }
-    //  过渡动画结束状态（移出）
-    .sort-leave-to {
-      height: 0px;
-    }
-    //  定义动画的时间、速率（移出）
-    .sort-leave-active {
-      overflow: hidden;
-      transition: all 0.5s linear;
-    }
+    // .sort-leave {
+    //   height: 463px;
+    // }
+    // //  过渡动画结束状态（移出）
+    // .sort-leave-to {
+    //   height: 0px;
+    // }
+    // //  定义动画的时间、速率（移出）
+    // .sort-leave-active {
+    //   overflow: hidden;
+    //   transition: all 0.5s linear;
+    // }
   }
 }
 </style>
