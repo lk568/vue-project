@@ -8,9 +8,11 @@ import { Icon } from 'element-ui';
 // 三级联动组件---全局组件
 import TypeNav from "@/components/TypeNav";
 import Carousel from "@/components/Carousel";
+import Pagination from "@/components/Pagination";
 // 注册全局组件Vue.component 第一个参数：全局组件的名字TypeNav.name, 第二个参数：哪一个组件TypeNav
 Vue.component(TypeNav.name, TypeNav)
 Vue.component(Carousel.name, Carousel)
+Vue.component(Pagination.name,Pagination)
 // 注册饿了么UI组件
 Vue.use(Icon)
 // 引入路由1

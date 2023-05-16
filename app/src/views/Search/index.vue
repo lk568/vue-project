@@ -54,21 +54,25 @@
                   @click="changeOrder('1')"
                 >
                   <!-- orderIcon决定是上还是下 v-if判断是否显示 -->
-                  <a>综合
+                  <a
+                    >综合
                     <i
                       :class="orderIcon"
                       v-if="this.searchParams.order.includes('1')"
-                    ></i></a>
+                    ></i
+                  ></a>
                 </li>
                 <li
                   :class="{ active: this.searchParams.order.includes('2') }"
                   @click="changeOrder('2')"
                 >
-                  <a>价格
+                  <a
+                    >价格
                     <i
                       :class="orderIcon"
                       v-if="this.searchParams.order.includes('2')"
-                    ></i></a>
+                    ></i
+                  ></a>
                 </li>
                 <!-- 下面两个没有对应数据，以后补充数据-->
                 <li><a>销量</a></li>
@@ -117,36 +121,16 @@
               </li>
             </ul>
           </div>
-          <!-- 分页器 -->
-          <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted"><span>...</span></li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div><span>共10页&nbsp;</span></div>
-            </div>
-          </div>
+          <!-- 分页器 props通信 -->
+          <Pagination
+            :pageNo="searchParams.pageNo"
+            :pageSize="searchParams.pageSize"
+            :total="total"
+            :totalPages="totalPages"
+            :continues="5"
+            @getPageNo="getPageNo"
+            @getPageSize="getPageSize"
+          ></Pagination>
         </div>
         <!--hotsale-->
         <div class="clearfix hot-sale">
@@ -315,6 +299,9 @@ export default {
       goodsList: (state) => state.searchList.goodsList || [],
       attrsList: (state) => state.searchList.attrsList || [],
       trademarkList: (state) => state.searchList.trademarkList || [],
+      // 分页器数据
+      total: (state) => state.searchList.total,
+      totalPages: (state) => state.searchList.totalPages,
     }),
     // 判断Icon图标使用哪一个（上还是下）
     orderIcon() {
@@ -355,7 +342,7 @@ export default {
         this.$router.push({ name: "search", query: this.$route.query });
       }
     },
-    // 使用子组件传递的自定义事件trademarksInfo和品牌的数据
+    // 使用子组件SearchSelector传递的自定义事件trademarksInfo和品牌的数据
     trademarksInfo(trademarksInfo) {
       // console.log("父组件",trademarksInfo);
       // 整理品牌字段参数 "ID:品牌名称"  重复点击同一个只发一次请求
@@ -407,6 +394,19 @@ export default {
       // 再次发送请求
       this.getData();
     },
+    // 自定义事件：子组件Pagination传递的，获取当前页码
+    getPageNo(newPageNo) {
+      // 更新页码
+      this.searchParams.pageNo = newPageNo;
+      // 发送请求
+      this.getData();
+    },
+    // 自定义事件：子组件Pagination传递过来的，获取当前页展示多少条数据
+    getPageSize(newPageSize){
+      // 改变展示的个数，重新发请求
+      this.searchParams.pageSize=newPageSize
+      this.getData()
+    }
   },
 };
 </script>
@@ -614,82 +614,6 @@ export default {
                 }
               }
             }
-          }
-        }
-      }
-      .page {
-        width: 733px;
-        height: 66px;
-        overflow: hidden;
-        float: right;
-        .sui-pagination {
-          margin: 18px 0;
-          ul {
-            margin-left: 0;
-            margin-bottom: 0;
-            vertical-align: middle;
-            width: 490px;
-            float: left;
-            li {
-              line-height: 18px;
-              display: inline-block;
-              a {
-                position: relative;
-                float: left;
-                line-height: 18px;
-                text-decoration: none;
-                background-color: #fff;
-                border: 1px solid #e0e9ee;
-                margin-left: -1px;
-                font-size: 14px;
-                padding: 9px 18px;
-                color: #333;
-              }
-              &.active {
-                a {
-                  background-color: #fff;
-                  color: #e1251b;
-                  border-color: #fff;
-                  cursor: default;
-                }
-              }
-              &.prev {
-                a {
-                  background-color: #fafafa;
-                }
-              }
-              &.disabled {
-                a {
-                  color: #999;
-                  cursor: default;
-                }
-              }
-              &.dotted {
-                span {
-                  margin-left: -1px;
-                  position: relative;
-                  float: left;
-                  line-height: 18px;
-                  text-decoration: none;
-                  background-color: #fff;
-                  font-size: 14px;
-                  border: 0;
-                  padding: 9px 18px;
-                  color: #333;
-                }
-              }
-              &.next {
-                a {
-                  background-color: #fafafa;
-                }
-              }
-            }
-          }
-          div {
-            color: #333;
-            font-size: 14px;
-            float: right;
-            width: 241px;
           }
         }
       }
