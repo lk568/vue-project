@@ -52,3 +52,10 @@ export const reqSearchList = (params) => {
         data:params
     })
 }
+// 详情页接口 URL: /api/item/{ skuId }  GET  有参数{必须}skuId	string	商品ID
+export const reqDetailList = (skuId) => {
+    return requests({
+        url: `/item/${skuId}`,
+        method:"GET",
+    })
+}

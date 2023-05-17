@@ -10,6 +10,7 @@ import Home from "@/views/Home"
 import Search from "@/views/Search"
 import Login from "@/views/Login"
 import Register from "@/views/Register"
+import Detail from "@/views/Detail"
 // 重写push|replace方法：
 // 这两个方法的返回值都是Promise
 /* 第一个参数：跳转的地址location
@@ -44,11 +45,12 @@ export default new VueRouter({
             component: Home,
             // 设置路由元信息meta
             meta: { footerShow: true }
-
         },
         {
+            // 指定params参数可传可不传
             path: "/search/:keyword?",
-            component: Search,
+            // 直接导入
+            component: () => import("@/views/Search"),
             meta: { footerShow: true },
             name: "search",
             // 路由组件传递props数据：
@@ -58,6 +60,15 @@ export default new VueRouter({
             // props: { a: 1, b: 2 },
             // 3函数写法,可以传params参数、query参数
             props: ($route) => ({ keyword: $route.params.keyword, k: $route.query.k })
+
+        },
+        {
+            // 有参数，使用:id占位
+            path: "/detail/:id",
+            component: Detail,
+            name: "detail",
+            // 设置路由元信息meta
+            meta: { footerShow: true }
 
         },
         {
@@ -75,5 +86,10 @@ export default new VueRouter({
             path: "/",
             redirect: "/home"
         }
-    ]
+    ],
+    // 路由跳转后的滚动行为
+    scrollBehavior(to, from, savedPosition) {
+        // 始终滚动到顶部
+        return { x: 0, y: 0 }
+    },
 })

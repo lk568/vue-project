@@ -22,6 +22,7 @@ const mutations = {
 }
 const getters = {}
 export default {
+    // 开启了命名空间，记得map获取数据时加上"仓库名"
     namespaced: true,
     state,
     mutations,

@@ -82,12 +82,17 @@
           </div>
           <div class="goods-list">
             <ul class="yui3-g">
-              <li class="yui3-u-1-5" v-for="goods in goodsList" :key="goods.id">
+              <li
+                class="yui3-u-1-5"
+                v-for="goods in goodsList"
+                :key="goods.id"
+              >
                 <div class="list-wrap">
                   <div class="p-img">
-                    <a href="item.html" target="_blank"
-                      ><img :src="goods.defaultImg"
-                    /></a>
+                    <!-- 导航式路由跳转到商品详情页 -->
+                    <router-link :to="`/detail/${goods.id}`">
+                      <img :src="goods.defaultImg" />
+                    </router-link>
                   </div>
                   <div class="price">
                     <strong>
@@ -97,8 +102,6 @@
                   </div>
                   <div class="attr">
                     <a
-                      target="_blank"
-                      href="item.html"
                       title="促销信息，下单即赠送三个月CIBN视频会员卡！【小米电视新品4A 58 火爆预约中】"
                       >{{ goods.title }}</a
                     >
@@ -107,12 +110,7 @@
                     <i class="command">已有<span>2000</span>人评价</i>
                   </div>
                   <div class="operate">
-                    <a
-                      href="success-cart.html"
-                      target="_blank"
-                      class="sui-btn btn-bordered btn-danger"
-                      >加入购物车</a
-                    >
+                    <a class="sui-btn btn-bordered btn-danger">加入购物车</a>
                     <a href="javascript:void(0);" class="sui-btn btn-bordered"
                       >收藏</a
                     >
@@ -402,11 +400,11 @@ export default {
       this.getData();
     },
     // 自定义事件：子组件Pagination传递过来的，获取当前页展示多少条数据
-    getPageSize(newPageSize){
+    getPageSize(newPageSize) {
       // 改变展示的个数，重新发请求
-      this.searchParams.pageSize=newPageSize
-      this.getData()
-    }
+      this.searchParams.pageSize = newPageSize;
+      this.getData();
+    },
   },
 };
 </script>
