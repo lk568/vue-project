@@ -84,7 +84,12 @@
                   :class="{ active: spuSaleAttrValue.isChecked === '1' }"
                   v-for="spuSaleAttrValue in spuSaleAttr.spuSaleAttrValueList"
                   :key="spuSaleAttrValue.id"
-                  @click="changeSpuSaleAttrValue( spuSaleAttrValue , spuSaleAttr.spuSaleAttrValueList )"
+                  @click="
+                    changeSpuSaleAttrValue(
+                      spuSaleAttrValue,
+                      spuSaleAttr.spuSaleAttrValueList
+                    )
+                  "
                 >
                   {{ spuSaleAttrValue.saleAttrValueName }}
                 </dd>
@@ -92,12 +97,22 @@
             </div>
             <div class="cartWrap">
               <div class="controls">
-                <input autocomplete="off" class="itxt" />
-                <a href="javascript:" class="plus">+</a>
-                <a href="javascript:" class="mins">-</a>
+                <input
+                  autocomplete="off"
+                  class="itxt"
+                  v-model.number.trim="skuNum"
+                  @change="changeSkuNum"
+                />
+                <a href="javascript:" class="plus" @click="skuNum++">+</a>
+                <a
+                  href="javascript:"
+                  class="mins"
+                  @click="skuNum > 1 ? skuNum-- : 1"
+                  >-</a
+                >
               </div>
               <div class="add">
-                <a href="javascript:">加入购物车</a>
+                <a @click="addToCart">加入购物车</a>
               </div>
             </div>
           </div>
@@ -342,13 +357,14 @@ import Zoom from "./Zoom/Zoom";
 
 export default {
   name: "Detail",
+  data() {
+    return {
+      skuNum: 1,
+    };
+  },
   components: {
     ImageList,
     Zoom,
-  },
-  mounted() {
-    // console.log(this.$route.params);//这里占位用的是:id
-    this.$store.dispatch("detail/detailList", this.$route.params.id);
   },
   computed: {
     ...mapGetters("detail", ["categoryView", "skuInfo", "spuSaleAttrList"]),
@@ -365,9 +381,30 @@ export default {
       arr.forEach((item) => {
         item.isChecked = "0";
       });
-      // 再给点击的那个添加高亮 
+      // 再给点击的那个添加高亮
       spuSaleAttrValue.isChecked = "1";
     },
+    // 用户手动输入购买数量的方法
+    changeSkuNum(event) {
+      // 排除非数字数据(v-model.number解决也可以数据*1===NaN解决)与负数和零(num>1)
+      if (event.target.value < 1) {
+        this.skuNum = 1;
+      } else {
+        // 小数就向下取整
+        this.skuNum = parseInt(event.target.value);
+      }
+    },
+    // 添加到购物车方法
+    addToCart(){
+      // 1发请求(派发action)---将数据存储到服务器(通知服务器)
+      this.$store.dispatch("detail/addToCart",{skuId:this.$route.params.id,skuNum:this.skuNum})
+      // 2.服务器返回数据成功----进行路由跳转
+      // 失败---提示用户
+    }
+  },
+  mounted() {
+    // console.log(this.$route.params);//这里占位用的是:id
+    this.$store.dispatch("detail/detailList", this.$route.params.id);
   },
 };
 </script>
@@ -567,7 +604,7 @@ export default {
 
               .mins {
                 right: -8px;
-                top: 19px;
+                top: 20px;
                 border-top: 0;
               }
 

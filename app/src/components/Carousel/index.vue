@@ -25,7 +25,7 @@ export default {
       handler(newValue, oldValue) {
         // 当执行这个回调函数时，说明数据被修改、v-for执行完成，服务器数据获取回来了【轮播图的结构也就完整了】
         this.$nextTick(() => {
-          var mySwipers = new Swiper(this.$refs.cur, {
+          new Swiper(this.$refs.cur, {
             loop: true, // 循环模式选项
             // 如果需要分页器
             pagination: {
