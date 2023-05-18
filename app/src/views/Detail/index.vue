@@ -100,7 +100,7 @@
                 <input
                   autocomplete="off"
                   class="itxt"
-                  v-model.number.trim="skuNum"
+                  v-model="skuNum"
                   @change="changeSkuNum"
                 />
                 <a href="javascript:" class="plus" @click="skuNum++">+</a>
@@ -386,8 +386,9 @@ export default {
     },
     // 用户手动输入购买数量的方法
     changeSkuNum(event) {
-      // 排除非数字数据(v-model.number解决也可以数据*1===NaN解决)与负数和零(num>1)
-      if (event.target.value < 1) {
+      // 排除非数字数据(v-model.number解决如果是纯英文会显示NaN）
+      // 这里用isNaN(数据*1)解决 如果不是数字返回true，是数字返回false 与 负数和零(num>1)
+      if (isNaN(event.target.value * 1) || event.target.value < 1) {
         this.skuNum = 1;
       } else {
         // 小数就向下取整
@@ -395,12 +396,27 @@ export default {
       }
     },
     // 添加到购物车方法
-    addToCart(){
+    async addToCart() {
       // 1发请求(派发action)---将数据存储到服务器(通知服务器)
-      this.$store.dispatch("detail/addToCart",{skuId:this.$route.params.id,skuNum:this.skuNum})
-      // 2.服务器返回数据成功----进行路由跳转
-      // 失败---提示用户
-    }
+      /* 
+      this.$store.dispatch("detail/addToCart", {skuId: this.$route.params.id,skuNum: this.skuNum,});
+      上面这段代码实际是调用了"addToCart"这个函数,让这个函数加上async,它的返回值就一定是Promise
+      要么成功 在函数中设置返回值为非空字符串 || 要么失败 在函数中设置返回值reject 
+      然后在下面判断他的返回值从而判断成功还是失败 try/catch处理
+      */
+     try {
+        await this.$store.dispatch("detail/addToCart", {
+          skuId: this.$route.params.id,
+          skuNum: this.skuNum,
+        });
+        // 2.服务器返回数据成功----进行路由跳转
+        // this.$router.push("")
+      } catch (error) {
+        alert("加入购物车失败"+error.message)
+     }
+
+      // 3失败---提示用户
+    },
   },
   mounted() {
     // console.log(this.$route.params);//这里占位用的是:id
