@@ -59,12 +59,19 @@ export const reqDetailList = (skuId) => {
         method:"GET",
     })
 }
-// 7. 添加到购物车(对已有物品进行数量改动) URL：/api/cart/addToCart/{ skuId }/{ skuNum }  POST  
+//  添加到购物车(对购物车中已有物品进行数量改动) URL：/api/cart/addToCart/{ skuId }/{ skuNum }  POST  
 /* 参数  skuID	string	Y	商品ID
         skuNum	string	Y	商品数量 正数代表增加 负数代表减少 */
 export const reqAddToCart = (skuId,skuNum)=>{
     return requests({
         url:`/cart/addToCart/${skuId}/${skuNum}`,
         method:"POST"
+    })
+}
+// 获取购物车列表  URL: /api/cart/cartList   GET
+export const reqCartList = ()=>{
+    return requests({
+        url:"/cart/cartList",
+        method:"GET"
     })
 }

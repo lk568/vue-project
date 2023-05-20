@@ -40,12 +40,14 @@ VueRouter.prototype.replace = function (location, resolve, reject) {
 export default new VueRouter({
     // 配置路由
     routes: [
+        // home页面路由  声明式导航不用加name
         {
             path: "/home",
             component: Home,
-            // 设置路由元信息meta
+            // 设置路由元信息meta 是否显示footer组件
             meta: { footerShow: true }
         },
+        // search页面路由
         {
             // 指定params参数可传可不传
             path: "/search/:keyword?",
@@ -62,20 +64,37 @@ export default new VueRouter({
             props: ($route) => ({ keyword: $route.params.keyword, k: $route.query.k })
 
         },
+        // 商品详情页面路由
         {
             // 有参数，使用:id占位
             path: "/detail/:id",
             component: Detail,
             name: "detail",
+            meta: { footerShow: true }
+
+        },
+        // 添加到购物车成功页面路由
+        {
+            path: "/addCartSuccess",
+            component: () => import("@/views/AddCartSuccess"),
+            name: "addCartSuccess",
+            meta: { footerShow: true }
+        },
+        // 购物车页面路由
+        {
+            path: "/shopcart",
+            component: () => import("@/views/ShopCart"),
             // 设置路由元信息meta
             meta: { footerShow: true }
 
         },
+        // 登录页面路由
         {
             path: "/login",
             component: Login,
             meta: { footerShow: false }
         },
+        // 注册页面路由
         {
             path: "/register",
             component: Register,

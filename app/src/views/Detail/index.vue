@@ -400,22 +400,29 @@ export default {
       // 1发请求(派发action)---将数据存储到服务器(通知服务器)
       /* 
       this.$store.dispatch("detail/addToCart", {skuId: this.$route.params.id,skuNum: this.skuNum,});
-      上面这段代码实际是调用了"addToCart"这个函数,让这个函数加上async,它的返回值就一定是Promise
+      上面这段代码实际是调用了"addToCart"这个函数,在action中加了async，返回值一定是Promise
       要么成功 在函数中设置返回值为非空字符串 || 要么失败 在函数中设置返回值reject 
-      然后在下面判断他的返回值从而判断成功还是失败 try/catch处理
+      然后在下面判断他的返回值从而判断成功还是失败 
       */
-     try {
-        await this.$store.dispatch("detail/addToCart", {
+
+      // 加await是为了等待调用异步函数后的Promise返回成功的结果 await和async配对使用
+      await this.$store
+        .dispatch("detail/addToCart", {
           skuId: this.$route.params.id,
           skuNum: this.skuNum,
+        })
+        // 2.服务器返回数据成功----进行路由跳转 && 将商品信息带过去（携带参数）
+        .then((resolve) => {
+          // 可以选择query传参，虽然可以但是地址栏会有乱码；这里更好的是会话存储sessionStorage  因为每次商品信息不同，没必要用本地存储
+          // 为什么不用本地存储localStorage,因为本地存储localStorage(有效期为持久化)；会话存储sessionStorage(有效期是本次会话结束 窗口关闭)
+          window.sessionStorage.setItem("skuInfo",JSON.stringify(this.skuInfo));
+          this.$router.push({name: "addCartSuccess",query: { skuNum: this.skuNum },});
+        })
+        // 3失败---提示用户
+        .catch((error) => {
+          alert("加入购物车失败" + error.message);
         });
-        // 2.服务器返回数据成功----进行路由跳转
-        // this.$router.push("")
-      } catch (error) {
-        alert("加入购物车失败"+error.message)
-     }
 
-      // 3失败---提示用户
     },
   },
   mounted() {

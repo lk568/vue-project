@@ -5,6 +5,8 @@ import nprogress from "nprogress"
 // start进度条开始，done进度条结束
 // 引入进度条样式
 import "nprogress/nprogress.css"
+// 引入store
+import store from "@/store"
 
 // 1.利用axios对象的方法create，创建一个axios实例(这里是requests)
 const requests = axios.create({
@@ -16,6 +18,11 @@ requests.interceptors.request.use((config) => {
     // 开启进度条
     nprogress.start()
     // config:配置对象，里面有一个属性很重要，Header请求头
+    // 将游客身份uuid放在请求头中，发请求时带给购物车页面
+    if(store.state.detail.uuid_token){
+        // 给请求头添加临时用户Id
+        config.headers.userTempId = store.state.detail.uuid_token
+    }
     return config
 })
 // 3.响应拦截器 可以在响应之后处理事情
