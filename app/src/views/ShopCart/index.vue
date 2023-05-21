@@ -31,25 +31,29 @@
             <span class="price">{{ cartInfo.skuPrice }}.00</span>
           </li>
           <li class="cart-list-con4">
-            <a
-              href="javascript:void(0)"
+            <button
               class="mins"
-              @click="changeNum(cartInfo, -1)"
-              >-</a
+              @click="changeNum(null,cartInfo, -1)"
+              :disabled="changeNum===1"
+              >-</button
             >
             <input
               autocomplete="off"
               type="text"
+              maxlength="8" 
               minnum="1"
               class="itxt"
               :value="cartInfo.skuNum"
-              @change="changeNum(cartInfo, $event.target.value * 1 - cartInfo.skuNum)"
+              @change="changeNum($event,cartInfo, $event.target.value * 1 - cartInfo.skuNum)"
+              onblur="this.value=this.value.replace(/\D/g,'')" 
+              onkeyup="this.value=this.value.replace(/\D/g,'')"
+              onafterpaste="this.value=this.value.replace(/\D/g,'')"
             />
-            <a
-              href="javascript:void(0)"
+            <!-- input输入框使用正则将不是数字(包括小数)的替换为空，并且0开头的去掉0  如001=1 00102=102 -->
+            <button
               class="plus"
-              @click="changeNum(cartInfo, 1)"
-              >+</a
+              @click="changeNum(null,cartInfo, 1)"
+              >+</button
             >
           </li>
           <li class="cart-list-con5">
@@ -92,6 +96,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+import throttle from "lodash/throttle";
 export default {
   name: "ShopCart",
   mounted() {
@@ -101,8 +106,8 @@ export default {
     getData() {
       this.$store.dispatch("shopcart/cartList");
     },
-    // 改变商品数量函数  第1个参数是确定哪一个商品，第二个参数changeNum是商品的数量变化
-    async changeNum(cartInfo, changeNum) {
+    // 改变商品数量函数 第1个参数是事件委托 第2个参数是确定哪一个商品，第3个参数changeNum是商品的数量变化
+     changeNum : throttle(async function ($event,cartInfo, changeNum) {
       // 解构cartInfo skuId确定是哪一个商品，skuNum是上次更新后的商品数量
       const { skuId, skuNum } = cartInfo;
       // 商品数量不能为负
@@ -115,10 +120,12 @@ export default {
           .catch((error) => {
             console.log(error);
           });
-      }else {
-        alert("请输入大于零的数字")
+      }else{
+        // 如果输入0，变为原来的
+        $event.target.value = skuNum
+        alert("不能再少了哦")
       }
-    },
+    },1000),
   },
   computed: {
     ...mapGetters("shopcart", ["cartListValue"]),
