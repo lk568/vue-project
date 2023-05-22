@@ -1,4 +1,4 @@
-import { reqCartList,reqAddToCart } from "@/api"
+import { reqCartList, reqAddToCart, reqDeleteCart, reqCheckCart} from "@/api"
 const state = {
     cartList: []
 }
@@ -17,7 +17,25 @@ const actions = {
             return "ok"
         } else {
             // 代表加入购物车失败
-            return Promise.reject(new Error("Promise返回失败"))
+            return Promise.reject(new Error("返回结果，加入失败"))
+        }
+    },
+    // 删除购物车
+    async deleteCart({commit},skuId){
+        let result = await reqDeleteCart(skuId)
+        if(result.code===200){
+            return "ok"
+        }else{
+            return Promise.reject(new Error("返回结果，删除失败"))
+        }
+    },
+    // 修改商品选中状态
+    async checkCart({commit},{ skuId, isChecked }){
+        let result = await reqCheckCart(skuId, isChecked)
+        if(result.code===200){
+            return "ok"
+        }else{
+            return Promise.reject(new Error("返回结果，修改失败"))
         }
     }
 }

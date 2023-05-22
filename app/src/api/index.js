@@ -23,10 +23,7 @@ export const reqBannerList = () => {
 }
 // mock floor轮播图接口
 export const reqFloorList = () => {
-    return mockRequests({
-        url: "/floor",
-        method: "get"
-    })
+    return mockRequests({ url: "/floor", method: "get" })
 }
 
 // search接口  /api/list   POST   有参数
@@ -46,32 +43,35 @@ export const reqFloorList = () => {
 
 //   params由搜索页派发actions第二个参数 传递过来  至少是一个空对象
 export const reqSearchList = (params) => {
-    return requests({
-        url: "/list",
-        method:"POST",
-        data:params
-    })
+    return requests({url: "/list", method:"POST", data:params })
 }
 // 详情页接口 URL: /api/item/{ skuId }  GET  有参数{必须}skuId	string	商品ID
 export const reqDetailList = (skuId) => {
-    return requests({
-        url: `/item/${skuId}`,
-        method:"GET",
-    })
+    return requests({ url: `/item/${skuId}`, method:"GET", })
 }
 //  添加到购物车(对购物车中已有物品进行数量改动) URL：/api/cart/addToCart/{ skuId }/{ skuNum }  POST  
 /* 参数  skuID	string	Y	商品ID
         skuNum	string	Y	商品数量 正数代表增加 负数代表减少 */
 export const reqAddToCart = (skuId,skuNum)=>{
-    return requests({
-        url:`/cart/addToCart/${skuId}/${skuNum}`,
-        method:"POST"
-    })
+    return requests({ url:`/cart/addToCart/${skuId}/${skuNum}`, method:"POST" })
 }
 // 获取购物车列表  URL: /api/cart/cartList   GET
 export const reqCartList = ()=>{
-    return requests({
-        url:"/cart/cartList",
-        method:"GET"
-    })
+    return requests({ url:"/cart/cartList", method:"GET" })
+}
+// 删除购物车商品  URL:/api/cart/deleteCart/{skuId}       DELETE
+/*参数名称	类型	是否必选	描述
+skuId	string	Y	商品id*/
+export const reqDeleteCart = (skuId)=>{
+    return requests({url:`/cart/deleteCart/${skuId}`,method:"DELETE"})
+}
+// 修改商品选中状态  URL：/api/cart/checkCart/{skuId}/{isChecked}  GET
+/* skuID	string	Y	商品ID
+isChecked	string	Y	商品选中状态
+                        0代表取消选中
+                        1代表选中
+
+ */
+export const reqCheckCart = (skuId,isChecked)=>{
+    return requests({url:`/cart/checkCart/${skuId}/${isChecked}`,method:"GET"})
 }

@@ -14,13 +14,14 @@
         <ul
           class="cart-list"
           v-for="cartInfo in cartInfoList"
-          :key="cartInfo.id"
+          :key="cartInfo.skuId"
         >
           <li class="cart-list-con1">
             <input
               type="checkbox"
               name="chk_list"
               :checked="cartInfo.isChecked === 1"
+              @change="checkCart(cartInfo.skuId, $event)"
             />
           </li>
           <li class="cart-list-con2">
@@ -33,34 +34,39 @@
           <li class="cart-list-con4">
             <button
               class="mins"
-              @click="changeNum(null,cartInfo, -1)"
-              :disabled="changeNum===1"
-              >-</button
+              @click="changeNum($event, cartInfo, -1)"
+              :disabled="cartInfo.skuNum === 1"
             >
+              -
+            </button>
             <input
               autocomplete="off"
               type="text"
-              maxlength="8" 
+              maxlength="8"
               minnum="1"
               class="itxt"
               :value="cartInfo.skuNum"
-              @change="changeNum($event,cartInfo, $event.target.value * 1 - cartInfo.skuNum)"
-              onblur="this.value=this.value.replace(/\D/g,'')" 
+              @change="
+                changeNum(
+                  $event,
+                  cartInfo,
+                  $event.target.value * 1 - cartInfo.skuNum
+                )
+              "
+              onblur="this.value=this.value.replace(/\D/g,'')"
               onkeyup="this.value=this.value.replace(/\D/g,'')"
               onafterpaste="this.value=this.value.replace(/\D/g,'')"
             />
             <!-- input输入框使用正则将不是数字(包括小数)的替换为空，并且0开头的去掉0  如001=1 00102=102 -->
-            <button
-              class="plus"
-              @click="changeNum(null,cartInfo, 1)"
-              >+</button
-            >
+            <button class="plus" @click="changeNum(null, cartInfo, 1)">
+              +
+            </button>
           </li>
           <li class="cart-list-con5">
             <span class="sum">{{ cartInfo.skuPrice * cartInfo.skuNum }}</span>
           </li>
           <li class="cart-list-con6">
-            <a href="#none" class="sindelet">删除</a>
+            <a class="sindelet" @click="deteleCart(cartInfo.skuId)">删除</a>
             <br />
             <a href="#none">移到收藏</a>
           </li>
@@ -70,7 +76,7 @@
     <div class="cart-tool">
       <div class="select-all">
         <input class="chooseAll" type="checkbox" :checked="isAllChecked" />
-        <span>全选</span>
+        <span>全选 {{ isAllChecked }}</span>
       </div>
       <div class="option">
         <a href="#none">删除选中的商品</a>
@@ -107,7 +113,7 @@ export default {
       this.$store.dispatch("shopcart/cartList");
     },
     // 改变商品数量函数 第1个参数是事件委托 第2个参数是确定哪一个商品，第3个参数changeNum是商品的数量变化
-     changeNum : throttle(async function ($event,cartInfo, changeNum) {
+    changeNum: throttle(async function ($event, cartInfo, changeNum) {
       // 解构cartInfo skuId确定是哪一个商品，skuNum是上次更新后的商品数量
       const { skuId, skuNum } = cartInfo;
       // 商品数量不能为负
@@ -120,12 +126,33 @@ export default {
           .catch((error) => {
             console.log(error);
           });
-      }else{
+      } else {
         // 如果输入0，变为原来的
-        $event.target.value = skuNum
-        alert("不能再少了哦")
+        $event.target.value = skuNum;
+        alert("不能再少了哦");
       }
-    },1000),
+    }, 1000),
+    // 删除购物车
+    async deteleCart(skuId) {
+      await this.$store
+        .dispatch("shopcart/deleteCart", skuId)
+        .then((resolve) => {
+          this.getData();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    async checkCart(skuId, $event) {
+      let isChecked = $event.target.checked ? 1 : 0;
+      await this.$store.dispatch("shopcart/checkCart", { skuId, isChecked })
+        .then((resolve) => {
+          this.getData();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
   },
   computed: {
     ...mapGetters("shopcart", ["cartListValue"]),
