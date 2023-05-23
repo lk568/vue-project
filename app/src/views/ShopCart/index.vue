@@ -75,11 +75,11 @@
     </div>
     <div class="cart-tool">
       <div class="select-all">
-        <input class="chooseAll" type="checkbox" :checked="isAllChecked" />
+        <input class="chooseAll" type="checkbox" v-model="isAllChecked" />
         <span>全选 {{ isAllChecked }}</span>
       </div>
       <div class="option">
-        <a href="#none">删除选中的商品</a>
+        <a @click="deleteCheckedInfo">删除选中的商品</a>
         <a href="#none">移到我的关注</a>
         <a href="#none">清除下柜商品</a>
       </div>
@@ -105,6 +105,45 @@ import { mapGetters } from "vuex";
 import throttle from "lodash/throttle";
 export default {
   name: "ShopCart",
+  computed: {
+    ...mapGetters("shopcart", ["cartListValue"]),
+    cartInfoList() {
+      return this.cartListValue.cartInfoList || [];
+    },
+    // 商品是否全选  数组every方法，判断数组中所有元素是否都符合某条件，是返回true，否返回false
+    // 只要有一个没选 即有一个元素的isChecked不为1，那就不是全选
+    isAllChecked: {
+      get() {
+        return this.cartInfoList.every((item) => item.isChecked === 1);
+      },
+      async set(value) {
+        const promises = this.cartInfoList.map((item) => {
+           console.log(value*1);//value为全选按钮是否勾选的状态checked属性值true或false true*1=1，false*1=0
+          //  利用v-model根据全选按钮的状态去改变所有商品按钮的状态，就是将全选按钮checked的属性值true|false * 1 得到1|0，让所有商品的isChecked值跟全选按钮checked值相同(因为所有按钮的checked是根据isChecked判断的)
+          return this.$store.dispatch("shopcart/checkCart",{skuId:item.skuId, isChecked:value * 1})
+        })
+          await Promise.all(promises)
+          this.getData()
+      },
+    },
+    // 获取所有商品的选中状态0..
+    // 商品总个数
+    totalNum() {
+      return this.cartInfoList.reduce((sum, item) => sum + item.skuNum, 0);
+    },
+    // 总价函数
+    totalPrice() {
+      return this.cartInfoList.reduce(
+        (sum, item) => sum + item.skuNum * item.skuPrice,
+        0
+      );
+    },
+    // 已经勾选的商品组成的数组
+    checkedCartInfo() {
+      // filter 返回所有满足条件(已勾选)的数组元素组成的新数组
+      return this.cartInfoList.filter((item) => item.isChecked === 1);
+    },
+  },
   mounted() {
     this.getData();
   },
@@ -118,7 +157,8 @@ export default {
       const { skuId, skuNum } = cartInfo;
       // 商品数量不能为负
       if (skuNum + changeNum > 0) {
-        await this.$store.dispatch("shopcart/addToCart", { skuId, skuNum: changeNum })
+        await this.$store
+          .dispatch("shopcart/addToCart", { skuId, skuNum: changeNum })
           .then((resolve) => {
             // console.log(resolve);
             this.getData();
@@ -143,9 +183,11 @@ export default {
           console.log(error);
         });
     },
+    // 改变勾选状态
     async checkCart(skuId, $event) {
       let isChecked = $event.target.checked ? 1 : 0;
-      await this.$store.dispatch("shopcart/checkCart", { skuId, isChecked })
+      await this.$store
+        .dispatch("shopcart/checkCart", { skuId, isChecked })
         .then((resolve) => {
           this.getData();
         })
@@ -153,27 +195,18 @@ export default {
           console.log(error);
         });
     },
-  },
-  computed: {
-    ...mapGetters("shopcart", ["cartListValue"]),
-    cartInfoList() {
-      return this.cartListValue.cartInfoList || [];
-    },
-    // 是否全选  数组every方法，判断数组中所有元素是否都符合某条件，是返回true，否返回false
-    // 只要有一个没选 即有一个元素的isChecked不为1，那就不是全选
-    isAllChecked() {
-      return this.cartInfoList.every((item) => item.isChecked === 1);
-    },
-    // 商品总个数
-    totalNum() {
-      return this.cartInfoList.reduce((sum, item) => sum + item.skuNum, 0);
-    },
-    // 总价函数
-    totalPrice() {
-      return this.cartInfoList.reduce(
-        (sum, item) => sum + item.skuNum * item.skuPrice,
-        0
-      );
+    // 删除所有勾选的商品【重点看看】
+    async deleteCheckedInfo() {
+      if (this.checkedCartInfo.length === 0) return;
+      if (window.confirm("你确定要删除吗？")) {
+        // 将派发后的结果利用map方法存储到数组promises中
+        const promises = this.checkedCartInfo.map((item) => {
+          return this.$store.dispatch("shopcart/deleteCart", item.skuId);
+        });
+        await Promise.all(promises);
+        // 当全部promise的的返回结果都成功了，在进行重新获取数据
+        this.getData();
+      }
     },
   },
 };
