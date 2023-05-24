@@ -53,8 +53,7 @@
                   $event.target.value * 1 - cartInfo.skuNum
                 )
               "
-              onblur="this.value=this.value.replace(/\D/g,'')"
-              onkeyup="this.value=this.value.replace(/\D/g,'')"
+              oninput="this.value=this.value.replace(/\D/g,'')"
               onafterpaste="this.value=this.value.replace(/\D/g,'')"
             />
             <!-- input输入框使用正则将不是数字(包括小数)的替换为空，并且0开头的去掉0  如001=1 00102=102 -->
@@ -75,7 +74,13 @@
     </div>
     <div class="cart-tool">
       <div class="select-all">
-        <input class="chooseAll" type="checkbox" v-model="isAllChecked" />
+        <!-- v-model和单选框结合 -->
+        <input
+          class="chooseAll"
+          type="checkbox"
+          v-model="isAllChecked"
+          :disabled="cartInfoList.length === 0"
+        />
         <span>全选 {{ isAllChecked }}</span>
       </div>
       <div class="option">
@@ -107,6 +112,7 @@ export default {
   name: "ShopCart",
   computed: {
     ...mapGetters("shopcart", ["cartListValue"]),
+    // 商品数组
     cartInfoList() {
       return this.cartListValue.cartInfoList || [];
     },
@@ -114,16 +120,26 @@ export default {
     // 只要有一个没选 即有一个元素的isChecked不为1，那就不是全选
     isAllChecked: {
       get() {
+        // 如果购物车中商品数量为零，直接return 返回值为false，即全选按钮变成未勾选状态
+        if (this.cartInfoList.length <= 0) return;
         return this.cartInfoList.every((item) => item.isChecked === 1);
       },
       async set(value) {
         const promises = this.cartInfoList.map((item) => {
-           console.log(value*1);//value为全选按钮是否勾选的状态checked属性值true或false true*1=1，false*1=0
+          //console.log(value*1);//value为全选按钮是否勾选的状态checked属性值true或false true*1=1，false*1=0
           //  利用v-model根据全选按钮的状态去改变所有商品按钮的状态，就是将全选按钮checked的属性值true|false * 1 得到1|0，让所有商品的isChecked值跟全选按钮checked值相同(因为所有按钮的checked是根据isChecked判断的)
-          return this.$store.dispatch("shopcart/checkCart",{skuId:item.skuId, isChecked:value * 1})
+          return this.$store.dispatch("shopcart/checkCart", {
+            skuId: item.skuId,
+            isChecked: value * 1,
+          });
+        });
+        await Promise.all(promises)
+        .then((resolve) => {
+          this.getData();
         })
-          await Promise.all(promises)
-          this.getData()
+        .catch((error) => {
+          console.log(error);
+        });
       },
     },
     // 获取所有商品的选中状态0..
@@ -203,9 +219,15 @@ export default {
         const promises = this.checkedCartInfo.map((item) => {
           return this.$store.dispatch("shopcart/deleteCart", item.skuId);
         });
-        await Promise.all(promises);
-        // 当全部promise的的返回结果都成功了，在进行重新获取数据
-        this.getData();
+        await Promise.all(promises)
+        .then((resolve) => {
+          // 当全部promise的的返回结果都成功了，在进行重新获取数据
+            // console.log(resolve);
+            this.getData();
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       }
     },
   },

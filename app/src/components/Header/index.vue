@@ -29,7 +29,7 @@
     <div class="bottom">
       <h1 class="logoArea">
         <router-link class="logo" to="/home" title="尚品汇">
-          <img src="./images/logo.png" alt="" />
+          <img src="@/assets/images/logo.png" alt="" />
         </router-link>
       </h1>
       <div class="searchArea">
