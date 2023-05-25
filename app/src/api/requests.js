@@ -23,6 +23,10 @@ requests.interceptors.request.use((config) => {
         // 给请求头添加临时用户Id
         config.headers.userTempId = store.state.detail.uuid_token
     }
+    // 将token添加到请求头中，当派发请求获取用户信息时利用token识别获取用户信息并展示
+    if(store.state.user.token){
+        config.headers.token = store.state.user.token
+    }
     return config
 })
 // 3.响应拦截器 可以在响应之后处理事情

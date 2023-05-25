@@ -90,3 +90,13 @@ export const reqUserRegister = (data) => {
 export const reqUserLogin = (data) => {
     return requests({ url: `/user/passport/login`, method: "POST" ,data})
 }
+
+// 获取用户信息【携带token去获取用户信息,将token存储到请求头中】 URL: api/user/passport/auth/getUserInfo  GET
+export const reqUserInfo = ()=>{
+    return requests({url:"/user/passport/auth/getUserInfo",method:"GET"})
+}
+
+// 退出登录
+export const reqLogout=()=>{
+    return requests({url:"/user/passport/logout",method:"GET"})
+}

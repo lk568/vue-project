@@ -37,18 +37,20 @@ export default {
     Floor,
     Brand,
   },
-  mounted(){
+  mounted() {
     // action需要在home中派发，因为有两个FLoor组件，需要用v-for遍历Floor组件【props传递数据父传子】
     this.$store.dispatch("home/floorList");
+
+    // 用户登录后，获取用户信息派发action
+    this.$store.dispatch("user/userInfo");
   },
-  computed:{
-    ...mapState("home",{
-      floorList:(state)=>{
+  computed: {
+    ...mapState("home", {
+      floorList: (state) => {
         return state.floorList;
-      }
-    })
+      },
+    }),
   },
-  
 };
 </script>
 <style scoped lang="less">

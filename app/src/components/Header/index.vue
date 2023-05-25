@@ -6,11 +6,17 @@
       <div class="container">
         <div class="loginList">
           <p>尚品汇欢迎您！</p>
-          <p>
+          <!-- 没有用户名 显示请登录 -->
+          <p v-if="!userName">
             <span>请</span>
             <!-- 路由跳转，单纯跳转不需要做其他事情，用声明式导航<router-link> -->
             <router-link to="/login">登录</router-link>
             <router-link to="/register" class="register">免费注册</router-link>
+          </p>
+          <!-- 有用户名 显示用户名信息 -->
+          <p v-else>
+            <a>{{ userName }}</a>
+            <a class="register" @click="logout">退出登录</a>
           </p>
         </div>
         <div class="typeList">
@@ -104,12 +110,29 @@ export default {
       // 答：通过重写push|replace方法，这两个方法存在于this.$router的隐式原型__proto__上也就是VueRouter的原型对象prototype上
       // console.log(this.$router.__proto__)
     },
+    // 退出登录
+    async logout(){
+      await this.$store.dispatch("user/logout")
+      .then(resolve=>{
+        // 退出登录后回到首页
+        this.$router.push("/home")
+      })
+      .catch(error=>{
+        // alert("退出失败"+error)
+      })
+    }
   },
   mounted(){
     // 使用事件总线（接收数据），接收到兄弟组件Search的通知，清除搜索框信息
     this.$bus.$on("clear",()=>{
       this.keyword=''
     })
+  },
+  computed:{
+    // 用户名信息，用来判断是显示用户名|还是请登录
+    userName(){
+      return this.$store.state.user.userInfo.name
+    },
   }
 };
 </script>

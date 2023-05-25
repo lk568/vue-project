@@ -81,7 +81,7 @@
           v-model="isAllChecked"
           :disabled="cartInfoList.length === 0"
         />
-        <span>全选 {{ isAllChecked }}</span>
+        <span>全选</span>
       </div>
       <div class="option">
         <a @click="deleteCheckedInfo">删除选中的商品</a>

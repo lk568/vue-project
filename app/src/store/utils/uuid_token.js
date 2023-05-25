@@ -9,6 +9,5 @@ export const getUUID = () => {
         // 本地存储一次
         window.localStorage.setItem("UUIDTOKEN", uuid_token)
     }
-    // 是一个函数，返回值
     return uuid_token
 }

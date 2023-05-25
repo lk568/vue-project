@@ -5,7 +5,7 @@ import { Promise } from "core-js"
 import { getUUID } from "../utils/uuid_token"
 const state = {
     detailList: {},
-    // 游客临时身份
+    // 获取游客临时身份
     uuid_token:getUUID()
 }
 const actions = {
