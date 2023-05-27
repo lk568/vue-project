@@ -5,12 +5,10 @@ import Vue from "vue"
 import VueRouter from "vue-router"
 // 使用插件2
 Vue.use(VueRouter)
+// 引入store
+import store from "@/store"
 // 引入路由组件3
-import Home from "@/views/Home"
-import Search from "@/views/Search"
-import Login from "@/views/Login"
-import Register from "@/views/Register"
-import Detail from "@/views/Detail"
+import routers from "./routers"
 // 重写push|replace方法：
 // 这两个方法的返回值都是Promise
 /* 第一个参数：跳转的地址location
@@ -36,79 +34,55 @@ VueRouter.prototype.replace = function (location, resolve, reject) {
         originReplace.call(this, location, () => { }, () => { })
     }
 }
-// 暴漏路由4，暴漏后在main.js中引入路由
-export default new VueRouter({
+
+let router = new VueRouter({
     // 配置路由
-    routes: [
-        // home页面路由  声明式导航不用加name
-        {
-            path: "/home",
-            component: Home,
-            // 设置路由元信息meta 是否显示footer组件
-            meta: { footerShow: true }
-        },
-        // search页面路由
-        {
-            // 指定params参数可传可不传
-            path: "/search/:keyword?",
-            // 直接导入
-            component: () => import("@/views/Search"),
-            meta: { footerShow: true },
-            name: "search",
-            // 路由组件传递props数据：
-            // 1布尔值写法,只能传params
-            // props:true,
-            // 2对象写法,可以额外给路由组件传一些props数据
-            // props: { a: 1, b: 2 },
-            // 3函数写法,可以传params参数、query参数
-            props: ($route) => ({ keyword: $route.params.keyword, k: $route.query.k })
-
-        },
-        // 商品详情页面路由
-        {
-            // 有参数，使用:id占位
-            path: "/detail/:id",
-            component: Detail,
-            name: "detail",
-            meta: { footerShow: true }
-
-        },
-        // 添加到购物车成功页面路由
-        {
-            path: "/addCartSuccess",
-            component: () => import("@/views/AddCartSuccess"),
-            name: "addCartSuccess",
-            meta: { footerShow: true }
-        },
-        // 购物车页面路由
-        {
-            path: "/shopcart",
-            component: () => import("@/views/ShopCart"),
-            // 设置路由元信息meta
-            meta: { footerShow: true }
-
-        },
-        // 登录页面路由
-        {
-            path: "/login",
-            component: Login,
-            meta: { footerShow: false }
-        },
-        // 注册页面路由
-        {
-            path: "/register",
-            component: Register,
-            meta: { footerShow: false }
-        },
-        // 重定向
-        {
-            path: "/",
-            redirect: "/home"
-        }
-    ],
+    routes: routers,
     // 路由跳转后的滚动行为
     scrollBehavior(to, from, savedPosition) {
         // 始终滚动到顶部
         return { x: 0, y: 0 }
     },
 })
+// 全局前置守卫（在路由跳转之前进行判断）
+/* to: Route: 即将要进入的目标 路由对象
+from: Route: 当前导航正要离开的路由
+next next()放行 next(path)放行到指定的页面  next(false)放行到from页面 */
+router.beforeEach(async (to, from, next) => {
+    // 用户已经登陆
+    if (store.state.user.token) {
+        // 已经登陆，如果在去login，不能去（回到home页面）
+        if (to.path === '/login') {
+            next('/home')
+            // console.log(111);
+        } else {
+            // 用户信息存在，可以跳转
+            if (Object.keys(store.state.user.userInfo).length !== 0) {
+                next()
+                // console.log(222);
+            } else {
+                // 用户信息不存在，就派发action让仓库存储用户信息在跳转
+                await store.dispatch("user/userInfo")
+                    .then(resolve => {
+                        // 获取用户信息成功
+                        next()
+                        // console.log(333);
+                    })
+                    .catch(async error => {
+                        // token失效了获取不到用户信息 清除token 重新登录
+                        // 退出登陆（清除token）
+                        await store.dispatch("user/logout")
+                            .then(resolve => {
+                                next('/login')
+                            })
+                    })
+            }
+        }
+    }else{
+        // 未登录暂时没有处理完毕，先这样
+        next()
+        // console.log(444);
+    }
+})
+// 暴漏路由4，暴漏后在main.js中引入路由
+export default router

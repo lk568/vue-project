@@ -100,3 +100,37 @@ export const reqUserInfo = ()=>{
 export const reqLogout=()=>{
     return requests({url:"/user/passport/logout",method:"GET"})
 }
+
+// 获取用户地址信息  URL:/api/user/userAddress/auth/findUserAddressList   get
+export const reqAddressInfo=()=>{
+    return requests({url:"/user/userAddress/auth/findUserAddressList",method:"GET"})
+}
+
+// 获取商品清单  URL：/api/order/auth/trade   get
+export const reqOrderInfo=()=>{
+    return requests({url:"/order/auth/trade",method:"GET"})
+}
+
+// 提交订单接口 URL:/api/order/auth/submitOrder?tradeNo={tradeNo}    POST
+/* 参数名称	      类型	  是否必选	    描述
+traderNo	    string	    Y	    交易编号(拼接在路径中)
+consignee	    string	    Y	    收件人姓名
+consigneeTel	string	    Y	    收件人电话
+deliveryAddress	string	    Y	    收件地址
+paymentWay	    string	    Y	    支付方式(ONLINE代表在线)
+orderComment	string	    Y	    订单备注
+orderDetailList	Array	    Y	    存储多个商品对象的数组 */
+export const reqSubmitOrder=(tradeNo,data)=>{
+    return requests({url:`/order/auth/submitOrder?tradeNo=${tradeNo} `,method:"POST",data})
+}
+
+// 获取支付信息 /api/payment/weixin/createNative/{orderId}  GET
+export const reqPayInfo=(orderId)=>{
+    return requests({url:`/payment/weixin/createNative/${orderId}`,method:"GET"})
+}
+
+// 获取订单支付状态 URL: /api/payment/weixin/queryPayStatus/{orderId} GET
+// orderId	string	Y	支付订单ID
+export const reqPayStatus= (orderId)=>{
+    return requests({url:`/payment/weixin/queryPayStatus/${orderId}`,method:"GET"})
+}
