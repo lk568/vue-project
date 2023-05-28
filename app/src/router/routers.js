@@ -6,6 +6,9 @@ import Detail from "@/views/Detail"
 import Trade from "@/views/Trade"
 import Pay from "@/views/Pay"
 import PaySuccess from "@/views/PaySuccess"
+import Center from "@/views/Center"
+import myOrder from '@/views/Center/myOrder'
+import groupOrder from '@/views/Center/groupOrder'
 export default [
     // home页面路由  声明式导航不用加name
     {
@@ -74,6 +77,26 @@ export default [
         component: PaySuccess,
         meta: { footerShow: true }
 
+    },
+    // 我的订单页面路由
+    {
+        path: "/center",
+        component: Center,
+        meta: { footerShow: true },
+        children:[
+            {
+                path:'myorder',
+                component:myOrder
+            },
+            {
+                path:'groupOrder',
+                component:groupOrder
+            },
+            {
+                path:'/center',
+                redirect:'/center/myorder'
+            }
+        ]
     },
     // 登录页面路由
     {

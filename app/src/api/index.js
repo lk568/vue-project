@@ -134,3 +134,12 @@ export const reqPayInfo=(orderId)=>{
 export const reqPayStatus= (orderId)=>{
     return requests({url:`/payment/weixin/queryPayStatus/${orderId}`,method:"GET"})
 }
+
+// 获取我的订单列表 /api/order/auth/{page}/{limit}
+/* 参数名称	 类型	是否必选	描述
+    page	string	Y	        页码
+    limit	string	Y	    每页显示数量 */
+
+export const reqMyOrderList = (page,limit)=>{
+    return requests({url:`/order/auth/${page}/${limit}`,method:"GET"})
+}
