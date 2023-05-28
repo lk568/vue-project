@@ -10,14 +10,14 @@ import Center from "@/views/Center"
 import myOrder from '@/views/Center/myOrder'
 import groupOrder from '@/views/Center/groupOrder'
 export default [
-    // home页面路由  声明式导航不用加name
+    // home页面路由（路由元信息）  声明式导航不用加name
     {
         path: "/home",
         component: Home,
         // 设置路由元信息meta 是否显示footer组件
         meta: { footerShow: true }
     },
-    // search页面路由
+    // search页面路由（路由传参）
     {
         // 指定params参数可传可不传
         path: "/search/:keyword?",
@@ -57,44 +57,70 @@ export default [
         meta: { footerShow: true }
 
     },
-    // 订单页面路由
+    // 订单页面路由（路由独享守卫）
     {
         path: "/trade",
         component: Trade,
-        meta: { footerShow: true }
-
+        meta: { footerShow: true },
+        // 路由独享守卫
+        beforeEnter: (to, from, next) => {
+            // 到订单页面 只能由购物车路由跳转
+            if (from.path === '/shopcart' || from.path === '/') {
+                next()
+                // 跳转后刷新白屏，bug 加一个判断(from.path === '/')解决（再刷新一瞬间，地址栏会变成/）
+            } else {
+                // 从其他页面来的，不让跳，哪来的回哪去
+                next(false)
+            }
+        }
     },
-    // 支付页面路由
+    // 支付页面路由（路由独享守卫）
     {
         path: "/pay",
         component: Pay,
-        meta: { footerShow: true }
-
+        meta: { footerShow: true },
+        // 路由独享守卫
+        beforeEnter: (to, from, next) => {
+            // 到支付页面 只能由订单路由跳转
+            if (from.path === '/trade' || from.path === '/') {
+                next()
+            } else {
+                // 从其他页面来的，不让跳，哪来的回哪去
+                next(false)
+            }
+        }
     },
-    // 支付成功页面路由
+    // 支付成功页面路由（路由独享守卫）
     {
         path: "/paysuccess",
         component: PaySuccess,
-        meta: { footerShow: true }
-
+        meta: { footerShow: true },
+        // 路由独享守卫
+        beforeEnter: (to, from, next) => {
+            if (from.path === '/pay' || from.path === '/') {
+                next()
+            } else {
+                next(false)
+            }
+        }
     },
-    // 我的订单页面路由
+    // 我的订单页面路由(二级路由)
     {
         path: "/center",
         component: Center,
         meta: { footerShow: true },
-        children:[
+        children: [
             {
-                path:'myorder',
-                component:myOrder
+                path: 'myorder',
+                component: myOrder
             },
             {
-                path:'groupOrder',
-                component:groupOrder
+                path: 'groupOrder',
+                component: groupOrder
             },
             {
-                path:'/center',
-                redirect:'/center/myorder'
+                path: '/center',
+                redirect: '/center/myorder'
             }
         ]
     },

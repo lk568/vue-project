@@ -20,6 +20,14 @@
 <script>
   export default {
     name: 'PaySuccess',
+    // 组件内守卫 只能从支付路由跳转到支付成功路由（这里用的是路由独享守卫）
+    // brforeRouterEnter:(to,from,next)=>{
+    //         if(from.path==='/pay'){
+    //             next()
+    //         }else{
+    //             next(false)
+    //         }
+    //     }
   }
 </script>
 

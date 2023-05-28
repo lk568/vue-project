@@ -94,8 +94,10 @@ export default {
         (await this.$store
           .dispatch("user/userLogin", { phone, password })
           .then((resolve) => {
-            // 注册成功，跳转到home界面
-            this.$router.push("/home");
+            // 登陆成功，判断路由中是否包含query参数，有就跳转到query参数对应的路由，没有就跳转到home路由
+            let toPath = this.$route.query.redirect || '/home'
+            // console.log(toPath);
+            this.$router.push(toPath);
           })
           .catch((error) => {
             alert(error+"或者密码不正确");

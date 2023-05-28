@@ -78,10 +78,21 @@ router.beforeEach(async (to, from, next) => {
                     })
             }
         }
-    }else{
-        // 未登录暂时没有处理完毕，先这样
-        next()
-        // console.log(444);
+    } else {
+        // 未登录：不能去购物车、交易相关、支付相关、个人订单相关页面
+        // 未登录如果要前往上面路由，跳转到登陆页面
+        let toPath = to.path
+        // (indexOf('xxx')===-1)表示路径中不包含xxx
+        // toPath.indexOf('/center') !== -1 表示路径中包含center  这样可以直接判断/center/myorder 和 /center/grouporder
+        // toPath.indexOf('/pay') !== -1 表示路径中包含pay   这样可以直接判断/pay 和 /paysuccess
+        if (toPath.indexOf('/shopcart') !== -1 || toPath.indexOf('/trade') !== -1 || toPath.indexOf('/pay') !== -1 || toPath.indexOf('/center') !== -1) {
+            // 利用query参数存储用户未登录时点击跳转的路由,当用户登录后，直接跳转到未登录时点击的路由
+            // (在登陆跳转函数那做判断，有query参数就跳到对应参数路由，没有就跳到home路由)
+            next(`/login?redirect=${toPath}`)
+        } else {
+            // 去的不是上面这些路由---放行
+            next()
+        }
     }
 })
 // 暴漏路由4，暴漏后在main.js中引入路由
